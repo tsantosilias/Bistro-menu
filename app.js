@@ -321,7 +321,7 @@ async function firebaseConnectionTest() {
     try {
 
         const snapshot = await getDocs(
-            collection(db, "test")
+            collection(db, "menuItems")
         );
 
         console.log(
