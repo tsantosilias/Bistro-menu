@@ -341,3 +341,20 @@ async function firebaseConnectionTest() {
 }
 
 firebaseConnectionTest();
+async function loadMenuFromFirebase() {
+
+    const snapshot = await getDocs(
+        collection(db, "menuItems")
+    );
+
+    console.log(
+        "MENU FROM FIREBASE:",
+        snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }))
+    );
+
+}
+
+loadMenuFromFirebase();
