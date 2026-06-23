@@ -1,0 +1,306 @@
+// ============================================================================
+// 1. DOM ELEMENT SELECTORS
+// ============================================================================
+const menuForm = document.getElementById('menu-form');
+const itemNameInput = document.getElementById('item-name');
+const itemDescriptionInput = document.getElementById('item-description'); 
+const itemPriceInput = document.getElementById('item-price');
+const itemCategorySelect = document.getElementById('item-category');
+const menuTableBody = document.getElementById('menu-table-body');
+const searchBar = document.getElementById('search-bar');
+const filterTabsContainer = document.getElementById('filter-tabs-container'); 
+const emptyState = document.getElementById('empty-state');
+
+const statTotalItems = document.getElementById('stat-total-items');
+const statTopCategory = document.getElementById('stat-top-category');
+
+// Selectors για τη λειτουργία του Responsive Burger Menu
+const adminSidebar = document.getElementById('admin-sidebar');
+const openSidebarTrigger = document.getElementById('open-sidebar-trigger');
+const closeSidebarTrigger = document.getElementById('close-sidebar-trigger');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+const editModal = document.getElementById('edit-modal');
+const editForm = document.getElementById('edit-form');
+const editItemId = document.getElementById('edit-item-id');
+const editItemName = document.getElementById('edit-item-name');
+const editItemDescription = document.getElementById('edit-item-description'); 
+const editItemPrice = document.getElementById('edit-item-price');
+const editItemCategory = document.getElementById('edit-item-category');
+const closeModalBtn = document.getElementById('close-modal-btn');
+
+// ============================================================================
+// 2. STATE (ΜΝΗΜΗ ΕΦΑΡΜΟΓΗΣ)
+// ============================================================================
+let menuItems = JSON.parse(localStorage.getItem('productionMenu')) || [];
+let categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || ['Mains', 'Drinks', 'Desserts'];
+let currentFilter = 'All'; 
+let currentSearchQuery = ''; 
+
+// ============================================================================
+// 3. RESPONSIVE SIDEBAR INTERACTION (ΛΟΓΙΚΗ BURGER)
+// ============================================================================
+// Συναρτήσεις για Άνοιγμα / Κλείσιμο του Sidebar στο κινητό (Διορθωμένο overlay με class)
+function openMobileSidebar() {
+    adminSidebar.classList.add('active');
+    if (sidebarOverlay) sidebarOverlay.classList.add('visible');
+}
+
+function closeMobileSidebar() {
+    adminSidebar.classList.remove('active');
+    if (sidebarOverlay) sidebarOverlay.classList.remove('visible');
+}
+
+// Listeners για τα κουμπιά και το overlay φόντο
+if (openSidebarTrigger) openSidebarTrigger.addEventListener('click', openMobileSidebar);
+if (closeSidebarTrigger) closeSidebarTrigger.addEventListener('click', closeMobileSidebar);
+if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+// ============================================================================
+// 4. DRAG AND DROP CONTROLLER
+// ============================================================================
+const sortable = new Sortable(menuTableBody, {
+    animation: 150, ghostClass: 'sortable-ghost', handle: '.drag-handle', 
+    onEnd: function () {
+        let NewOrderedList = [];
+        const rows = menuTableBody.querySelectorAll('tr');
+        rows.forEach((row, index) => {
+            const id = parseInt(row.getAttribute('data-id'));
+            const item = menuItems.find(i => i.id === id);
+            if (item) { item.order = index + 1; NewOrderedList.push(item); }
+        });
+        if (currentFilter !== 'All' || currentSearchQuery !== '') {
+            menuItems.forEach(item => { if (!NewOrderedList.some(n => n.id === item.id)) NewOrderedList.push(item); });
+        }
+        menuItems = NewOrderedList;
+        localStorage.setItem('productionMenu', JSON.stringify(menuItems));
+        calculateCalculatedStats();
+        renderDashboard(); 
+    }
+});
+
+// ============================================================================
+// 5. RENDER ENGINE
+// ============================================================================
+function renderDashboard() {
+    menuTableBody.innerHTML = '';
+    categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || ['Mains', 'Drinks', 'Desserts'];
+
+    menuItems.sort((a, b) => parseInt(a.order || 0) - parseInt(b.order || 0));
+
+    const filteredItems = menuItems.filter(item => {
+        const matchesCategory = (currentFilter === 'All' || item.category === currentFilter);
+        const matchesSearch = item.name.toLowerCase().includes(currentSearchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
+
+    if (filteredItems.length === 0) { emptyState.classList.remove('hidden'); } 
+    else { emptyState.classList.add('hidden'); }
+
+    filteredItems.forEach((item) => {
+        const row = document.createElement('tr');
+        row.setAttribute('data-id', item.id);
+        
+        if (item.hidden) {
+            row.style.opacity = "0.6";
+            row.style.backgroundColor = "rgba(239, 68, 68, 0.05)";
+        }
+
+        const hideIcon = item.hidden ? '🙈 Unstock' : '👁️ Stocked';
+
+        row.innerHTML = `
+            <td>
+                <strong>${item.name}</strong> ${item.hidden ? '<span style="color: #ef4444; font-size: 11px; margin-left: 5px; font-weight: bold;">[OUT OF STOCK]</span>' : ''}
+                <div style="font-size: 13px; color: #64748b; font-weight: normal; margin-top: 4px;">${item.description || '<i>No description added.</i>'}</div>
+            </td>
+            <td><span class="badge ${item.category}">${item.category}</span></td>
+            <td><strong>${parseFloat(item.price).toFixed(2)} €</strong></td>
+            <td style="text-align: right;">
+                <div class="action-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                    <span class="drag-handle" style="margin-right: 10px;">☰</span>
+                    <button class="btn-row-edit" style="background: ${item.hidden ? '#64748b' : '#2a4a58'}; color: white;" onclick="toggleHideItem(${item.id})">${hideIcon}</button>
+                    <button class="btn-row-edit" onclick="openEditModal(${item.id})">Edit</button>
+                    <button class="btn-row-del" onclick="deleteItem(${item.id})">Delete</button>
+                </div>
+            </td>
+        `;
+        menuTableBody.appendChild(row);
+    });
+
+    calculateCalculatedStats();
+    renderDropdowns();         
+    renderFilterTabs();        
+    localStorage.setItem('productionMenu', JSON.stringify(menuItems));
+}
+
+window.toggleHideItem = function(id) {
+    const item = menuItems.find(i => i.id === id);
+    if (item) {
+        item.hidden = !item.hidden;
+        renderDashboard();
+    }
+};
+
+function renderDropdowns() {
+    const currentMainSel = itemCategorySelect.value;
+    itemCategorySelect.innerHTML = '';
+    editItemCategory.innerHTML = '';
+    categoryOrder.forEach(cat => {
+        const opt1 = document.createElement('option'); opt1.value = cat; opt1.textContent = cat;
+        itemCategorySelect.appendChild(opt1);
+        const opt2 = document.createElement('option'); opt2.value = cat; opt2.textContent = cat;
+        editItemCategory.appendChild(opt2);
+    });
+    if(currentMainSel && categoryOrder.includes(currentMainSel)) itemCategorySelect.value = currentMainSel;
+}
+
+function renderFilterTabs() {
+    if (!filterTabsContainer) return;
+    filterTabsContainer.innerHTML = '';
+    const allBtn = document.createElement('button');
+    allBtn.className = `tab-btn ${currentFilter === 'All' ? 'active' : ''}`;
+    allBtn.textContent = 'All Items';
+    allBtn.onclick = () => handleTabClick(allBtn, 'All');
+    filterTabsContainer.appendChild(allBtn);
+
+    categoryOrder.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = `tab-btn ${currentFilter === cat ? 'active' : ''}`;
+        btn.textContent = cat;
+        btn.onclick = () => handleTabClick(btn, cat);
+        filterTabsContainer.appendChild(btn);
+    });
+}
+
+function handleTabClick(buttonElement, category) {
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    buttonElement.classList.add('active');
+    currentFilter = category;
+    renderDashboard();
+}
+
+function calculateCalculatedStats() {
+    if (statTotalItems) statTotalItems.textContent = menuItems.length;
+    const counts = {};
+    categoryOrder.forEach(c => counts[c] = 0);
+    menuItems.forEach(item => { if(counts[item.category] !== undefined) counts[item.category]++; });
+    let maxCat = 'None'; let maxVal = 0;
+    for (const [cat, val] of Object.entries(counts)) {
+        if (val > maxVal) { maxVal = val; maxCat = cat; }
+    }
+    if (statTopCategory) statTopCategory.textContent = maxCat !== 'None' ? `${maxCat} (${maxVal})` : 'None';
+}
+
+// ============================================================================
+// 6. CREATE DISH OPERATION
+// ============================================================================
+menuForm.addEventListener('submit', (e) => {
+    e.preventDefault(); 
+    const nextOrder = menuItems.length + 1;
+    const selectedCategory = itemCategorySelect.value;
+
+    const newItem = {
+        id: Date.now(), name: itemNameInput.value.trim(), description: itemDescriptionInput.value.trim(), 
+        order: nextOrder, price: parseFloat(itemPriceInput.value), category: selectedCategory, hidden: false
+    };
+
+    menuItems.push(newItem);
+    renderDashboard();
+    itemNameInput.value = ''; itemDescriptionInput.value = ''; itemPriceInput.value = '';
+    
+    // Κλείνουμε αυτόματα το μενού στο κινητό μετά την καταχώρηση
+    closeMobileSidebar();
+});
+
+// ============================================================================
+// 7. DELETE & UPDATE OPERATIONS
+// ============================================================================
+function deleteItem(id) {
+    if(confirm("Are you sure you want to remove this dish?")) {
+        menuItems = menuItems.filter(item => item.id !== id);
+        menuItems.forEach((item, index) => { item.order = index + 1; });
+        renderDashboard();
+    }
+}
+
+function openEditModal(id) {
+    const targetItem = menuItems.find(item => item.id === id);
+    if (!targetItem) return; 
+
+    editItemId.value = targetItem.id;
+    editItemName.value = targetItem.name;
+    editItemDescription.value = targetItem.description || ''; 
+    editItemPrice.value = targetItem.price;
+    renderDropdowns(); 
+    editItemCategory.value = targetItem.category;
+    editModal.classList.remove('hidden');
+}
+
+closeModalBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+
+editForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const idToUpdate = parseInt(editItemId.value);
+    const targetItem = menuItems.find(item => item.id === idToUpdate);
+
+    if (targetItem) {
+        targetItem.name = editItemName.value.trim();
+        targetItem.description = editItemDescription.value.trim(); 
+        targetItem.price = parseFloat(editItemPrice.value);
+        targetItem.category = editItemCategory.value;
+        renderDashboard();
+        editModal.classList.add('hidden');
+    }
+});
+
+if (searchBar) searchBar.addEventListener('input', (e) => { currentSearchQuery = e.target.value; renderDashboard(); });
+
+renderDashboard();
+
+// ============================================================================
+// PREMIUM QR CODE INITIALIZATION & ENGINE FUNCTIONS (Πλήρως Διορθωμένο)
+// ============================================================================
+
+// Αυτό το update διασφαλίζει ότι το QR code θα δείχνει στο σωστό menu.html του GitHub Pages
+const targetCustomerMenuURL = window.location.href.replace("index.html", "menu.html").split('?')[0];
+
+const qrContainer = document.getElementById("qr-code-element");
+if (qrContainer) {
+    const menuQRCodeInstance = new QRCode(qrContainer, {
+        text: targetCustomerMenuURL,
+        width: 100,
+        height: 100,
+        colorDark : "#0f172a", 
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H 
+    });
+}
+
+// Download handler function με διπλό έλεγχο (img & canvas) για 100% επιτυχία
+window.downloadMenuQR = function() {
+    const qrElement = document.getElementById("qr-code-element");
+    if (!qrElement) return;
+
+    const qrImage = qrElement.querySelector("img");
+    const qrCanvas = qrElement.querySelector("canvas");
+
+    let finalDataImageStream = "";
+
+    if (qrImage && qrImage.src && qrImage.src.startsWith("data:image")) {
+        finalDataImageStream = qrImage.src;
+    } else if (qrCanvas) {
+        finalDataImageStream = qrCanvas.toDataURL("image/png");
+    }
+
+    if (finalDataImageStream) {
+        const virtualDownloadLinkAnchor = document.createElement("a");
+        virtualDownloadLinkAnchor.href = finalDataImageStream;
+        virtualDownloadLinkAnchor.download = "Bistro_Menu_Table_QR.png";
+        
+        document.body.appendChild(virtualDownloadLinkAnchor);
+        virtualDownloadLinkAnchor.click();
+        document.body.removeChild(virtualDownloadLinkAnchor);
+    } else {
+        alert("The QR code is generating. Please wait a second and click download again!");
+    }
+};

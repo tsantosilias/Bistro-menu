@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bistro Admin Dashboard</title>
+    
+    <!-- Google Fonts: Εισαγωγή της Inter για απόλυτα clean & premium look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ======================================================================
+           REFINED PREMIUM BASE STYLES
+           ====================================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* ======================================================================
+           SLEEK SIDEBAR DESIGN
+           ====================================================================== */
+        .sidebar {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            border-right: 1px solid #1e293b;
+        }
+
+        .sidebar h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+            margin-bottom: 5px;
+        }
+
+        .input-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .input-box label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 0.5px;
+        }
+
+        .input-box input, 
+        .input-box select, 
+        .input-box textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .input-box input:focus, 
+        .input-box select:focus, 
+        .input-box textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: #334155;
+            color: white;
+            border: 1px solid #475569;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .btn-primary:hover { background: #475569; border-color: #64748b; }
+
+        /* ======================================================================
+           MAIN CONTENT & DYNAMIC CARDS
+           ====================================================================== */
+        .main-content {
+            padding: 40px;
+            background-color: #f8fafc;
+        }
+
+        .top-header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        #search-bar {
+            padding: 10px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #ffffff;
+            color: #0f172a;
+            outline: none;
+            transition: border 0.2s;
+        }
+        #search-bar:focus { border-color: #94a3b8; }
+
+        .analytics-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 30px;
+            margin-bottom: 35px;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card h3 {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .qr-card {
+            align-items: center;
+            text-align: center;
+            padding: 15px !important;
+        }
+
+        #qr-code-element {
+            padding: 6px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin: 8px 0;
+            display: inline-block;
+        }
+
+        .btn-qr-download {
+            background: #ffffff;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-qr-download:hover { background: #f8fafc; border-color: #94a3b8; }
+
+        .btn-manage-categories {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+        .btn-manage-categories:hover { background: #1e293b; }
+
+        /* ======================================================================
+           MINIMAL FILTER TABS
+           ====================================================================== */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #475569;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background: #0f172a;
+            color: white;
+            border-color: #0f172a;
+        }
+
+        /* ======================================================================
+           PREMIUM TABLE & ACTION ROW DESIGN
+           ====================================================================== */
+        .table-container {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 14px 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        td {
+            padding: 16px 20px;
+            font-size: 14px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        /* Badges Κατηγοριών */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 6px;
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        /* Drag handle styling */
+        .drag-handle {
+            cursor: grab;
+            color: #94a3b8;
+            font-size: 16px;
+            padding: 4px 8px;
+            transition: color 0.2s;
+        }
+        .drag-handle:hover { color: #64748b; }
+
+        /* PREMIUM ACTION BUTTONS */
+        .btn-row-edit, .btn-row-del {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #334155;
+            transition: all 0.2s;
+        }
+        .btn-row-edit:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .btn-row-del { color: #ef4444; border-color: #fca5a5; background: #fff5f5; }
+        .btn-row-del:hover { background: #fee2e2; }
+
+        .sortable-ghost { opacity: 0.4; background-color: #f8fafc !important; }
+
+        /* ======================================================================
+           MODAL DESIGN
+           ====================================================================== */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center; z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.hidden { display: none; }
+        
+        .modal-box {
+            background: #ffffff; padding: 30px; border-radius: 12px;
+            width: 100%; max-width: 460px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .modal-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #0f172a; }
+        .modal-box .input-box input, .modal-box .input-box select, .modal-box .input-box textarea {
+            background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a;
+        }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        
+        .btn-secondary {
+            background: #f1f5f9; color: #475569; border: none; padding: 10px 16px;
+            font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer;
+        }
+
+        /* ======================================================================
+           RESPONSIVE LAYOUT (MOBILE SIDEBAR)
+           ====================================================================== */
+        .admin-burger-btn, .close-sidebar-btn { display: none; }
+
+        @media (max-width: 950px) {
+            .dashboard-wrapper { display: block; padding: 15px; }
+            .sidebar {
+                position: fixed; top: 0; left: -320px !important; width: 300px; height: 100vh;
+                z-index: 999; box-shadow: 5px 0 30px rgba(0, 0, 0, 0.15);
+                transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; padding-top: 60px;
+            }
+            .sidebar.active { left: 0 !important; }
+            
+            .admin-burger-btn {
+                display: flex; background: #0f172a; color: white; border: none;
+                padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600;
+                cursor: pointer; align-items: center; gap: 8px; margin-bottom: 20px;
+            }
+            .close-sidebar-btn {
+                display: block; background: none; border: none; color: #94a3b8;
+                font-size: 32px; cursor: pointer; position: absolute; top: 15px; right: 20px; line-height: 1;
+            }
+            .sidebar-overlay {
+                display: block; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 998;
+                opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+            }
+            .sidebar-overlay.visible { opacity: 1; pointer-events: auto; }
+            .analytics-cards { grid-template-columns: 1fr; gap: 15px; }
+            .main-content { padding: 15px 0; }
+            .table-container { overflow-x: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <div class="dashboard-wrapper">
+        
+        <!-- SIDEBAR CONTROLS -->
+        <aside class="sidebar" id="admin-sidebar">
+            <button class="close-sidebar-btn" id="close-sidebar-trigger">&times;</button>
+
+            <h2>🍳 Add New Dish</h2>
+            <form id="menu-form">
+                <div class="input-box">
+                    <label>Dish Name</label>
+                    <input type="text" id="item-name" placeholder="e.g., Truffle Pasta" required>
+                </div>
+                <div class="input-box">
+                    <label>Description (Optional)</label>
+                    <textarea id="item-description" placeholder="e.g., Creamy pasta with fresh truffles..." rows="3"></textarea>
+                </div>
+                <div class="input-box">
+                    <label>Price (€)</label>
+                    <input type="number" id="item-price" placeholder="0.00" step="0.01" min="0.1" required>
+                </div>
+                <div class="input-box">
+                    <label>Category</label>
+                    <select id="item-category" required></select>
+                </div>
+                <button type="submit" class="btn-primary">Add To Menu</button>
+            </form>
+        </aside>
+
+        <!-- ΚΥΡΙΩΣ DASHBOARD -->
+        <main class="main-content">
+            <header class="top-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <button class="admin-burger-btn" id="open-sidebar-trigger">☰ Add New Dish</button>
+                    <h1>Bistro Control Panel</h1>
+                </div>
+                <input type="text" id="search-bar" placeholder="🔍 Search dishes...">
+            </header>
+
+            <!-- ΑΝΑΛΥΤΙΚΑ ΣΤΑΤΙΣΤΙΚΑ & ΡΥΘΜΙΣΤΗΣ -->
+            <section class="analytics-cards">
+                <div class="card">
+                    <h3>Total Dishes</h3>
+                    <p id="stat-total-items" style="font-size: 28px; font-weight: 700; margin-top: 6px; color: #0f172a;">0</p>
+                </div>
+                
+                <div class="card qr-card">
+                    <h3>Live Menu QR Code</h3>
+                    <div id="qr-code-element"></div>
+                    <button class="btn-qr-download" onclick="downloadMenuQR()">Download PNG</button>
+                </div>
+
+                <div class="card">
+                    <h3>Top Category</h3>
+                    <p id="stat-top-category" style="font-size: 20px; font-weight: 600; margin-top: 4px; color: #334155;">None</p>
+                    <a href="categories.html" class="btn-manage-categories">📂 Manage Categories</a>
+                </div>
+            </section>
+
+            <!-- ΦΙΛΤΡΑ ΚΑΤΗΓΟΡΙΩΝ -->
+            <section class="filter-tabs" id="filter-tabs-container"></section>
+
+            <!-- ΠΙΝΑΚΑΣ ΠΡΟΪΟΝΤΩΝ -->
+            <section class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 45%;">Dish Details</th>
+                            <th style="width: 15%;">Category</th>
+                            <th style="width: 15%;">Price</th>
+                            <th style="text-align: right; width: 25%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="menu-table-body"></tbody>
+                </table>
+                <!-- EDIT HERE: Το στοιχείο έγινε πλέον τελείως κρυφό (αόρατο container) για να μη χαλάνε τα στυλ της JS -->
+                <div id="empty-state" style="display: none !important;"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- UPDATE MODAL POPUP -->
+    <div id="edit-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2>✏️ Edit Dish</h2>
+            <form id="edit-form">
+                <input type="hidden" id="edit-item-id">
+                <div class="input-box">
+                    <label>Dish Name</label>
+                    <input type="text" id="edit-item-name" required>
+                </div>
+                <div class="input-box">
+                    <label>Description (Optional)</label>
+                    <textarea id="edit-item-description" rows="3"></textarea>
+                </div>
+                <div class="input-box">
+                    <label>Price (€)</label>
+                    <input type="number" id="edit-item-price" step="0.01" min="0.1" required>
+                </div>
+                <div class="input-box">
+                    <label>Category</label>
+                    <select id="edit-item-category" required></select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="close-modal-btn" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 10px 20px;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

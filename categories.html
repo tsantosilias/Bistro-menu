@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Categories</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ======================================================================
+           PREMIUM BASE STYLES
+           ====================================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* PREMIUM CONTAINER */
+        .category-container {
+            width: 100%;
+            max-width: 550px;
+            background: #ffffff;
+            padding: 35px 30px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* BACK BUTTON */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            transition: color 0.2s;
+        }
+        .btn-back:hover { color: #0f172a; }
+
+        /* HEADINGS */
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2 {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 35px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 8px;
+        }
+
+        /* INPUT FIELDS */
+        .input-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .input-box label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 11px 14px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            color: #0f172a;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .input-box input:focus {
+            border-color: #0f172a;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.05);
+        }
+
+        /* BUTTONS (Slate Black / Dark Theme Matching) */
+        .btn-primary {
+            width: 100%;
+            background: #0f172a;
+            color: white;
+            border: 1px solid #0f172a;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .btn-primary:hover { background: #1e293b; }
+
+        /* ======================================================================
+           PREMIUM DRAG & DROP LIST LAYOUT
+           ====================================================================== */
+        .category-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            padding: 14px 18px;
+            border-radius: 8px;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+            transition: background-color 0.2s;
+        }
+        .category-item:hover {
+            background-color: #f8fafc;
+        }
+        
+        /* Drag handle icon design */
+        .category-drag-handle {
+            cursor: grab;
+            color: #94a3b8;
+            font-size: 16px;
+            font-weight: bold;
+            user-select: none;
+            padding: 2px 6px;
+            transition: color 0.2s;
+        }
+        .category-drag-handle:hover {
+            color: #64748b;
+        }
+        
+        /* Sortable ghost state placeholder */
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: #f1f5f9 !important;
+            border: 1px dashed #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="category-container">
+        <a href="index.html" class="btn-back">← Back to Control Panel</a>
+        
+        <h1>📁 Category Management</h1>
+        
+        <form id="category-page-form">
+            <div class="input-box">
+                <label>New Category Name</label>
+                <input type="text" id="new-cat-input" placeholder="e.g., Starters, Wines, Cocktails" required>
+            </div>
+            <button type="submit" class="btn-primary">+ Create Category</button>
+        </form>
+
+        <h2>Sort Order (Drag ☰ to change live on menu)</h2>
+        
+        <div class="category-list" id="category-page-list"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <script>
+        let categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || ['Mains', 'Drinks', 'Desserts'];
+
+        const categoryForm = document.getElementById('category-page-form');
+        const newCatInput = document.getElementById('new-cat-input');
+        const categoryPageList = document.getElementById('category-page-list');
+
+        // Αρχικοποίηση του Drag and Drop για τις κατηγορίες
+        const sortableCategories = new Sortable(categoryPageList, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            handle: '.category-drag-handle',
+            
+            onEnd: function () {
+                let newOrder = [];
+                const items = categoryPageList.querySelectorAll('.category-item');
+                items.forEach(item => {
+                    newOrder.push(item.getAttribute('data-name'));
+                });
+                
+                categoryOrder = newOrder;
+                localStorage.setItem('categoryOrder', JSON.stringify(categoryOrder));
+            }
+        });
+
+        // ΣΧΕΔΙΑΣΗ ΚΑΤΗΓΟΡΙΩΝ
+        function renderCategoriesPage() {
+            categoryPageList.innerHTML = '';
+            
+            categoryOrder.forEach((cat) => {
+                const item = document.createElement('div');
+                item.className = 'category-item';
+                item.setAttribute('data-name', cat);
+                
+                item.innerHTML = `
+                    <span>${cat}</span>
+                    <span class="category-drag-handle">☰</span>
+                `;
+                categoryPageList.appendChild(item);
+            });
+        }
+
+        // ΠΡΟΣΘΗΚΗ ΝΕΑΣ ΚΑΤΗΓΟΡΙΑΣ
+        categoryForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newCat = newCatInput.value.trim();
+            
+            if(categoryOrder.map(c => c.toLowerCase()).includes(newCat.toLowerCase())) {
+                alert("This category already exists!");
+                return;
+            }
+
+            categoryOrder.push(newCat);
+            localStorage.setItem('categoryOrder', JSON.stringify(categoryOrder));
+            newCatInput.value = '';
+            renderCategoriesPage();
+        });
+
+        renderCategoriesPage();
+    </script>
+</body>
+</html>

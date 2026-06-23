@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bistro - Our Menu</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ΓΕΝΙΚΑ ΣΤΥΛ & ΚΑΘΑΡΗ ΓΡΑΜΜΑΤΟΣΕΙΡΑ */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            /* Προεπιλεγμένη γραμματοσειρά για όλο το μενού η καθαρή Inter */
+            font-family: 'Inter', sans-serif; 
+        }
+        
+        body { 
+            background-image: url('my-background.png');
+            background-attachment: fixed; 
+            background-size: cover; 
+            background-position: center; 
+            color: #1e293b; 
+            padding: 20px 10px; 
+            overflow: hidden; 
+            height: 100vh; 
+        }
+        
+        /* ΚΕΝΤΡΙΚΟΣ ΚΑΙ ΣΕΛΙΔΟΠΟΙΗΣΗ */
+        .menu-wrapper { 
+            width: 100%; 
+            max-width: 850px; 
+            margin: 0 auto; 
+            background: #ffffff; 
+            padding: 35px 25px 25px 25px; 
+            border-radius: 16px; 
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15); 
+            border: 1px solid rgba(226, 232, 240, 0.8); 
+            min-height: 90vh;
+            max-height: calc(100vh - 40px); 
+            overflow-y: auto; 
+        }
+        
+        /* ΤΙΤΛΟΣ ΜΕΝΟΥ (Elegant Serif) */
+        h1 { 
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(26px, 5vw, 38px); 
+            font-style: italic;
+            font-weight: 400;
+            margin-bottom: 8px; 
+            color: #0f172a; 
+            letter-spacing: -0.5px; 
+            text-align: center;
+        }
+        
+        .subtitle { 
+            font-size: clamp(12px, 2.5vw, 14px);
+            color: #64748b; 
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        /* RESPONSIVE ΟΡΙΖΟΝΤΙΟ SCROLL ΣΤΙΣ ΚΑΤΗΓΟΡΙΕΣ */
+        .categories { 
+            display: flex; 
+            flex-wrap: nowrap; 
+            justify-content: flex-start; 
+            gap: 8px; 
+            
+            overflow-x: auto; 
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch; 
+            
+            position: sticky;
+            top: -35px; 
+            background: #ffffff; 
+            padding-top: 20px;
+            padding-bottom: 20px; 
+            z-index: 10;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 30px;
+        }
+        
+        /* Κρύβουμε τη μπάρα σκρολαρίσματος */
+        .categories::-webkit-scrollbar { display: none; }
+        .categories { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* ΚΟΜΨΑ MINIMAL ΚΟΥΜΠΙΑ */
+        .cat-btn { 
+            padding: 8px 18px; 
+            border: 1px solid #e2e8f0; 
+            background: #f8fafc; 
+            cursor: pointer; 
+            border-radius: 20px; 
+            font-size: 13px; 
+            font-weight: 500;
+            color: #475569; 
+            transition: all 0.2s ease; 
+            white-space: nowrap; 
+            flex-shrink: 0; 
+        }
+        
+        .cat-btn.active, .cat-btn:hover { 
+            background: #0f172a; 
+            color: #ffffff; 
+            border-color: #0f172a; 
+        }
+        
+        /* EDIT HERE: Premium Italic Τίτλοι Κατηγοριών με τη σωστή γραμματοσειρά */
+        .category-section-title {
+            grid-column: 1 / -1; 
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(24px, 5vw, 30px); 
+            font-style: italic; 
+            font-weight: 400; 
+            color: #0f172a;
+            text-align: left;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        /* ΠΛΕΓΜΑ ΜΕΝΟΥ (2 Στήλες) */
+        .menu-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 25px 45px; 
+            text-align: left; 
+        }
+        
+        /* ΣΤΟΙΧΕΙΟ ΠΙΑΤΟΥ */
+        .menu-item { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px; 
+            width: 100%; 
+        }
+        
+        .item-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: baseline; 
+        }
+        
+        /* Καθαρό, modern όνομα πιάτου */
+        .item-name { 
+            font-size: clamp(15px, 3.5vw, 16px); 
+            font-weight: 600; 
+            color: #0f172a; 
+            letter-spacing: -0.2px;
+        }
+        
+        /* Minimal λεπτή διακεκομμένη γραμμή */
+        .item-dots { 
+            flex-grow: 1; 
+            border-bottom: 1px dashed #cbd5e1; 
+            margin: 0 8px; 
+            position: relative;
+            top: -4px;
+        }
+        
+        /* Καθαρή, modern τιμή */
+        .item-price { 
+            font-size: clamp(15px, 3.5vw, 16px); 
+            font-weight: 500; 
+            color: #0f172a; 
+            white-space: nowrap; 
+        }
+        
+        /* Καθαρή περιγραφή */
+        .item-description {
+            font-size: 13px;
+            color: #64748b; 
+            line-height: 1.5;
+            margin-top: 2px;
+            min-height: 18px; 
+        }
+        
+        .no-items { 
+            grid-column: 1 / -1; 
+            text-align: center; 
+            color: #94a3b8; 
+            font-style: italic; 
+            padding: 40px; 
+        }
+
+        /* MEDIA QUERIES ΓΙΑ ΚΙΝΗΤΑ */
+        @media (max-width: 768px) { 
+            .menu-grid { 
+                grid-template-columns: 1fr; 
+                gap: 20px; 
+            } 
+            .menu-wrapper {
+                padding: 25px 18px; 
+                max-height: calc(100vh - 40px);
+            }
+            .categories {
+                top: -25px;
+                padding-top: 15px;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-wrapper">
+        <header>
+            <h1>The Bistro Menu</h1>
+            <p class="subtitle">Fresh ingredients • Crafted daily</p>
+        </header>
+
+        <nav class="categories" id="customer-nav-container"></nav>
+
+        <main class="menu-grid" id="customer-menu-grid"></main>
+    </div>
+
+    <script>
+        let customerFilter = 'All';
+
+        function displayCustomerMenu() {
+            const grid = document.getElementById('customer-menu-grid');
+            const navContainer = document.getElementById('customer-nav-container');
+            grid.innerHTML = '';
+
+            const sharedMenu = JSON.parse(localStorage.getItem('productionMenu')) || [];
+            const categoriesToDisplay = JSON.parse(localStorage.getItem('categoryOrder')) || ['Mains', 'Drinks', 'Desserts'];
+
+            sharedMenu.sort((a, b) => parseInt(a.order || 0) - parseInt(b.order || 0));
+
+            navContainer.innerHTML = '';
+            
+            const allBtn = document.createElement('button');
+            allBtn.className = `cat-btn ${customerFilter === 'All' ? 'active' : ''}`;
+            allBtn.textContent = 'All';
+            allBtn.onclick = () => filterCustomerMenu('All');
+            navContainer.appendChild(allBtn);
+
+            categoriesToDisplay.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `cat-btn ${customerFilter === cat ? 'active' : ''}`;
+                btn.textContent = cat;
+                btn.onclick = () => filterCustomerMenu(cat);
+                navContainer.appendChild(btn);
+            });
+
+            if (sharedMenu.length === 0) {
+                grid.innerHTML = `<div class="no-items">Our kitchen is preparing updates. Check back shortly!</div>`;
+                return;
+            }
+
+            if (customerFilter === 'All') {
+                categoriesToDisplay.forEach(cat => {
+                    const catItems = sharedMenu.filter(item => item.category === cat);
+                    if (catItems.length > 0) {
+                        const titleDiv = document.createElement('div');
+                        titleDiv.className = 'category-section-title';
+                        titleDiv.textContent = cat;
+                        grid.appendChild(titleDiv);
+
+                        catItems.forEach(item => appendItemToGrid(grid, item));
+                    }
+                });
+            } else {
+                const visibleItems = sharedMenu.filter(item => item.category === customerFilter);
+                if (visibleItems.length === 0) {
+                    grid.innerHTML = `<div class="no-items">No items available in this category.</div>`;
+                    return;
+                }
+                visibleItems.forEach(item => appendItemToGrid(grid, item));
+            }
+        }
+
+        function appendItemToGrid(container, item) {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'menu-item';
+            
+            const descriptionContent = item.description ? item.description : '&nbsp;';
+            
+            const priceHTML = item.hidden 
+                ? `<span style="color: #ef4444; font-size: 13px; font-weight: 500; letter-spacing: 0;">Out of stock</span>`
+                : `${parseFloat(item.price).toFixed(2)} €`;
+
+            const nameStyle = item.hidden 
+                ? `color: #94a3b8; font-weight: 500; font-style: italic;` 
+                : `color: #0f172a;`;
+
+            itemDiv.innerHTML = `
+                <div class="item-header" style="${item.hidden ? 'opacity: 0.6;' : ''}">
+                    <span class="item-name" style="${nameStyle}">${item.name}</span>
+                    <span class="item-dots"></span>
+                    <span class="item-price">${priceHTML}</span>
+                </div>
+                <div class="item-description" style="${item.hidden ? 'opacity: 0.5;' : ''}">${descriptionContent}</div>
+            `;
+            
+            container.appendChild(itemDiv);
+        }
+
+        function filterCustomerMenu(category) {
+            customerFilter = category;
+            displayCustomerMenu();
+        }
+
+        displayCustomerMenu();
+        window.addEventListener('storage', () => displayCustomerMenu());
+    </script>
+</body>
+</html>
