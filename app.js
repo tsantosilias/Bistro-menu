@@ -1,3 +1,14 @@
+
+
+
+import {
+    db,
+    collection,
+    getDocs
+} from "./firebase.js";
+
+
+
 // ============================================================================
 // 1. DOM ELEMENT SELECTORS
 // ============================================================================
@@ -304,3 +315,29 @@ window.downloadMenuQR = function() {
         alert("The QR code is generating. Please wait a second and click download again!");
     }
 };
+
+async function firebaseConnectionTest() {
+
+    try {
+
+        const snapshot = await getDocs(
+            collection(db, "test")
+        );
+
+        console.log(
+            "Firebase Connected:",
+            snapshot.docs.map(doc => doc.data())
+        );
+
+    } catch(error) {
+
+        console.error(
+            "Firebase Error:",
+            error
+        );
+
+    }
+
+}
+
+firebaseConnectionTest();
