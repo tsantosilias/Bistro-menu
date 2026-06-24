@@ -27,6 +27,10 @@
             min-height: 100vh;
         }
 
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
         .dashboard-wrapper {
             display: grid;
             grid-template-columns: 280px 1fr;
@@ -255,6 +259,14 @@
             display: flex;
             gap: 8px;
             margin-bottom: 20px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .tab-btn {
@@ -267,6 +279,8 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
+            flex: 0 0 auto;
+            white-space: nowrap;
         }
 
         .tab-btn.active, .tab-btn:hover {
@@ -386,9 +400,13 @@
         @media (max-width: 950px) {
             .dashboard-wrapper { display: block; padding: 15px; }
             .sidebar {
-                position: fixed; top: 0; left: -320px !important; width: 300px; height: 100vh;
+                position: fixed; top: 0; bottom: 0; left: -320px !important; width: 300px; height: 100dvh;
                 z-index: 999; box-shadow: 5px 0 30px rgba(0, 0, 0, 0.15);
-                transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; padding-top: 60px;
+                transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                padding-top: 60px;
+                padding-bottom: 24px;
             }
             .sidebar.active { left: 0 !important; }
             
@@ -410,37 +428,67 @@
             .analytics-cards { grid-template-columns: 1fr; gap: 15px; }
             .analytics-cards .card:first-child { display: none; }
             .main-content { padding: 15px 0; }
-            .table-container { overflow-x: visible; }
-
-            table {
-                table-layout: fixed;
+            .filter-tabs {
+                margin-left: -15px;
+                margin-right: -15px;
+                padding: 0 15px 12px;
+                margin-bottom: 12px;
             }
 
-            th:nth-child(2),
-            th:nth-child(3),
+            .table-container { overflow: hidden; }
+
+            table {
+                display: block;
+                width: 100%;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tbody {
+                display: block;
+            }
+
+            tr {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                gap: 10px;
+                align-items: center;
+                padding: 14px 12px;
+                border-bottom: 1px solid #f1f5f9;
+            }
+
+            tr:last-child {
+                border-bottom: none;
+            }
+
+            td {
+                display: block;
+                padding: 0;
+                border-bottom: none;
+                min-width: 0;
+            }
+
             td:nth-child(2),
             td:nth-child(3) {
                 display: none;
             }
 
-            th:first-child,
-            td:first-child {
-                width: 62% !important;
+            td:first-child strong,
+            td:first-child div {
+                overflow-wrap: anywhere;
             }
 
-            th:last-child,
             td:last-child {
-                width: 38% !important;
-                padding-left: 8px;
-            }
-
-            td {
-                padding: 14px 12px;
+                justify-self: end;
             }
 
             .action-row {
                 flex-wrap: wrap;
+                justify-content: flex-end !important;
                 gap: 6px !important;
+                max-width: 118px;
             }
 
             .drag-handle {

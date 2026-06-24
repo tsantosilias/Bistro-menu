@@ -64,11 +64,13 @@ let hasAttemptedLocalMenuMigration = false;
 // Συναρτήσεις για Άνοιγμα / Κλείσιμο του Sidebar στο κινητό (Διορθωμένο overlay με class)
 function openMobileSidebar() {
     adminSidebar.classList.add('active');
+    document.body.classList.add('sidebar-open');
     if (sidebarOverlay) sidebarOverlay.classList.add('visible');
 }
 
 function closeMobileSidebar() {
     adminSidebar.classList.remove('active');
+    document.body.classList.remove('sidebar-open');
     if (sidebarOverlay) sidebarOverlay.classList.remove('visible');
 }
 
