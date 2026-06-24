@@ -198,8 +198,17 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 
-    <script>
-        let categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || ['Mains', 'Drinks', 'Desserts'];
+    <script type="module">
+        import {
+            db,
+            doc,
+            onSnapshot,
+            setDoc
+        } from "./firebase.js";
+
+        const DEFAULT_CATEGORIES = ['Mains', 'Drinks', 'Desserts'];
+        const categoriesDocRef = doc(db, 'settings', 'categories');
+        let categoryOrder = DEFAULT_CATEGORIES;
 
         const categoryForm = document.getElementById('category-page-form');
         const newCatInput = document.getElementById('new-cat-input');
@@ -211,7 +220,7 @@
             ghostClass: 'sortable-ghost',
             handle: '.category-drag-handle',
             
-            onEnd: function () {
+            onEnd: async function () {
                 let newOrder = [];
                 const items = categoryPageList.querySelectorAll('.category-item');
                 items.forEach(item => {
@@ -219,7 +228,7 @@
                 });
                 
                 categoryOrder = newOrder;
-                localStorage.setItem('categoryOrder', JSON.stringify(categoryOrder));
+                await setDoc(categoriesDocRef, { order: categoryOrder });
             }
         });
 
@@ -241,7 +250,7 @@
         }
 
         // ΠΡΟΣΘΗΚΗ ΝΕΑΣ ΚΑΤΗΓΟΡΙΑΣ
-        categoryForm.addEventListener('submit', (e) => {
+        categoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newCat = newCatInput.value.trim();
             
@@ -251,12 +260,22 @@
             }
 
             categoryOrder.push(newCat);
-            localStorage.setItem('categoryOrder', JSON.stringify(categoryOrder));
+            await setDoc(categoriesDocRef, { order: categoryOrder });
             newCatInput.value = '';
             renderCategoriesPage();
         });
 
         renderCategoriesPage();
+
+        onSnapshot(categoriesDocRef, async (snapshot) => {
+            if (snapshot.exists() && Array.isArray(snapshot.data().order)) {
+                categoryOrder = snapshot.data().order;
+            } else {
+                categoryOrder = DEFAULT_CATEGORIES;
+                await setDoc(categoriesDocRef, { order: DEFAULT_CATEGORIES });
+            }
+            renderCategoriesPage();
+        }, (error) => console.error('Category listener error:', error));
     </script>
 </body>
 </html>

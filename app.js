@@ -4,7 +4,12 @@
 import {
     db,
     collection,
-    getDocs
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    setDoc
 } from "./firebase.js";
 
 
@@ -43,10 +48,15 @@ const closeModalBtn = document.getElementById('close-modal-btn');
 // ============================================================================
 // 2. STATE (ΜΝΗΜΗ ΕΦΑΡΜΟΓΗΣ)
 // ============================================================================
-let menuItems = JSON.parse(localStorage.getItem('productionMenu')) || [];
-let categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || ['Mains', 'Drinks', 'Desserts'];
+const DEFAULT_CATEGORIES = ['Mains', 'Drinks', 'Desserts'];
+const menuItemsRef = collection(db, 'menuItems');
+const categoriesDocRef = doc(db, 'settings', 'categories');
+
+let menuItems = [];
+let categoryOrder = DEFAULT_CATEGORIES;
 let currentFilter = 'All'; 
 let currentSearchQuery = ''; 
+let hasAttemptedLocalMenuMigration = false;
 
 // ============================================================================
 // 3. RESPONSIVE SIDEBAR INTERACTION (ΛΟΓΙΚΗ BURGER)
@@ -72,11 +82,11 @@ if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeMobileSidebar)
 // ============================================================================
 const sortable = new Sortable(menuTableBody, {
     animation: 150, ghostClass: 'sortable-ghost', handle: '.drag-handle', 
-    onEnd: function () {
+    onEnd: async function () {
         let NewOrderedList = [];
         const rows = menuTableBody.querySelectorAll('tr');
         rows.forEach((row, index) => {
-            const id = parseInt(row.getAttribute('data-id'));
+            const id = row.getAttribute('data-id');
             const item = menuItems.find(i => i.id === id);
             if (item) { item.order = index + 1; NewOrderedList.push(item); }
         });
@@ -84,7 +94,9 @@ const sortable = new Sortable(menuTableBody, {
             menuItems.forEach(item => { if (!NewOrderedList.some(n => n.id === item.id)) NewOrderedList.push(item); });
         }
         menuItems = NewOrderedList;
-        localStorage.setItem('productionMenu', JSON.stringify(menuItems));
+        await Promise.all(menuItems.map((item, index) => 
+            updateDoc(doc(db, 'menuItems', item.id), { order: index + 1 })
+        ));
         calculateCalculatedStats();
         renderDashboard(); 
     }
@@ -95,7 +107,6 @@ const sortable = new Sortable(menuTableBody, {
 // ============================================================================
 function renderDashboard() {
     menuTableBody.innerHTML = '';
-    categoryOrder = JSON.parse(localStorage.getItem('categoryOrder')) || ['Mains', 'Drinks', 'Desserts'];
 
     menuItems.sort((a, b) => parseInt(a.order || 0) - parseInt(b.order || 0));
 
@@ -129,9 +140,9 @@ function renderDashboard() {
             <td style="text-align: right;">
                 <div class="action-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                     <span class="drag-handle" style="margin-right: 10px;">☰</span>
-                    <button class="btn-row-edit" style="background: ${item.hidden ? '#64748b' : '#2a4a58'}; color: white;" onclick="toggleHideItem(${item.id})">${hideIcon}</button>
-                    <button class="btn-row-edit" onclick="openEditModal(${item.id})">Edit</button>
-                    <button class="btn-row-del" onclick="deleteItem(${item.id})">Delete</button>
+                    <button class="btn-row-edit" style="background: ${item.hidden ? '#64748b' : '#2a4a58'}; color: white;" onclick="toggleHideItem('${item.id}')">${hideIcon}</button>
+                    <button class="btn-row-edit" onclick="openEditModal('${item.id}')">Edit</button>
+                    <button class="btn-row-del" onclick="deleteItem('${item.id}')">Delete</button>
                 </div>
             </td>
         `;
@@ -141,14 +152,12 @@ function renderDashboard() {
     calculateCalculatedStats();
     renderDropdowns();         
     renderFilterTabs();        
-    localStorage.setItem('productionMenu', JSON.stringify(menuItems));
 }
 
-window.toggleHideItem = function(id) {
+window.toggleHideItem = async function(id) {
     const item = menuItems.find(i => i.id === id);
     if (item) {
-        item.hidden = !item.hidden;
-        renderDashboard();
+        await updateDoc(doc(db, 'menuItems', id), { hidden: !item.hidden });
     }
 };
 
@@ -205,18 +214,17 @@ function calculateCalculatedStats() {
 // ============================================================================
 // 6. CREATE DISH OPERATION
 // ============================================================================
-menuForm.addEventListener('submit', (e) => {
+menuForm.addEventListener('submit', async (e) => {
     e.preventDefault(); 
     const nextOrder = menuItems.length + 1;
     const selectedCategory = itemCategorySelect.value;
 
     const newItem = {
-        id: Date.now(), name: itemNameInput.value.trim(), description: itemDescriptionInput.value.trim(), 
+        name: itemNameInput.value.trim(), description: itemDescriptionInput.value.trim(), 
         order: nextOrder, price: parseFloat(itemPriceInput.value), category: selectedCategory, hidden: false
     };
 
-    menuItems.push(newItem);
-    renderDashboard();
+    await addDoc(menuItemsRef, newItem);
     itemNameInput.value = ''; itemDescriptionInput.value = ''; itemPriceInput.value = '';
     
     // Κλείνουμε αυτόματα το μενού στο κινητό μετά την καταχώρηση
@@ -226,13 +234,18 @@ menuForm.addEventListener('submit', (e) => {
 // ============================================================================
 // 7. DELETE & UPDATE OPERATIONS
 // ============================================================================
-function deleteItem(id) {
+async function deleteItem(id) {
     if(confirm("Are you sure you want to remove this dish?")) {
-        menuItems = menuItems.filter(item => item.id !== id);
-        menuItems.forEach((item, index) => { item.order = index + 1; });
-        renderDashboard();
+        await deleteDoc(doc(db, 'menuItems', id));
+        const remainingItems = menuItems
+            .filter(item => item.id !== id)
+            .sort((a, b) => parseInt(a.order || 0) - parseInt(b.order || 0));
+        await Promise.all(remainingItems.map((item, index) => 
+            updateDoc(doc(db, 'menuItems', item.id), { order: index + 1 })
+        ));
     }
 }
+window.deleteItem = deleteItem;
 
 function openEditModal(id) {
     const targetItem = menuItems.find(item => item.id === id);
@@ -246,27 +259,64 @@ function openEditModal(id) {
     editItemCategory.value = targetItem.category;
     editModal.classList.remove('hidden');
 }
+window.openEditModal = openEditModal;
 
 closeModalBtn.addEventListener('click', () => editModal.classList.add('hidden'));
 
-editForm.addEventListener('submit', (e) => {
+editForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const idToUpdate = parseInt(editItemId.value);
+    const idToUpdate = editItemId.value;
     const targetItem = menuItems.find(item => item.id === idToUpdate);
 
     if (targetItem) {
-        targetItem.name = editItemName.value.trim();
-        targetItem.description = editItemDescription.value.trim(); 
-        targetItem.price = parseFloat(editItemPrice.value);
-        targetItem.category = editItemCategory.value;
-        renderDashboard();
+        await updateDoc(doc(db, 'menuItems', idToUpdate), {
+            name: editItemName.value.trim(),
+            description: editItemDescription.value.trim(),
+            price: parseFloat(editItemPrice.value),
+            category: editItemCategory.value
+        });
         editModal.classList.add('hidden');
     }
 });
 
 if (searchBar) searchBar.addEventListener('input', (e) => { currentSearchQuery = e.target.value; renderDashboard(); });
 
+function subscribeToFirebase() {
+    onSnapshot(categoriesDocRef, async (snapshot) => {
+        if (snapshot.exists() && Array.isArray(snapshot.data().order)) {
+            categoryOrder = snapshot.data().order;
+        } else {
+            const savedCategories = JSON.parse(localStorage.getItem('categoryOrder') || 'null');
+            categoryOrder = Array.isArray(savedCategories) && savedCategories.length > 0
+                ? savedCategories
+                : DEFAULT_CATEGORIES;
+            await setDoc(categoriesDocRef, { order: categoryOrder });
+            localStorage.removeItem('categoryOrder');
+        }
+        renderDashboard();
+    }, (error) => console.error('Category listener error:', error));
+
+    onSnapshot(menuItemsRef, async (snapshot) => {
+        if (!hasAttemptedLocalMenuMigration && snapshot.empty) {
+            hasAttemptedLocalMenuMigration = true;
+            const savedMenu = JSON.parse(localStorage.getItem('productionMenu') || '[]');
+            if (Array.isArray(savedMenu) && savedMenu.length > 0) {
+                await Promise.all(savedMenu.map(({ id, ...item }) => addDoc(menuItemsRef, item)));
+                localStorage.removeItem('productionMenu');
+                return;
+            }
+        }
+
+        menuItems = snapshot.docs.map(menuDoc => ({
+            id: menuDoc.id,
+            ...menuDoc.data()
+        }));
+        renderDashboard();
+    }, (error) => console.error('Menu listener error:', error));
+}
+
 renderDashboard();
+subscribeToFirebase();
 
 // ============================================================================
 // PREMIUM QR CODE INITIALIZATION & ENGINE FUNCTIONS (Πλήρως Διορθωμένο)
@@ -316,45 +366,3 @@ window.downloadMenuQR = function() {
     }
 };
 
-async function firebaseConnectionTest() {
-
-    try {
-
-        const snapshot = await getDocs(
-            collection(db, "menuItems")
-        );
-
-        console.log(
-            "Firebase Connected:",
-            snapshot.docs.map(doc => doc.data())
-        );
-
-    } catch(error) {
-
-        console.error(
-            "Firebase Error:",
-            error
-        );
-
-    }
-
-}
-
-firebaseConnectionTest();
-async function loadMenuFromFirebase() {
-
-    const snapshot = await getDocs(
-        collection(db, "menuItems")
-    );
-
-    console.log(
-        "MENU FROM FIREBASE:",
-        snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }))
-    );
-
-}
-
-loadMenuFromFirebase();

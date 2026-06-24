@@ -222,16 +222,22 @@
         <main class="menu-grid" id="customer-menu-grid"></main>
     </div>
 
-    <script>
+    <script type="module">
+        import {
+            db,
+            collection,
+            doc,
+            onSnapshot
+        } from "./firebase.js";
+
         let customerFilter = 'All';
+        let sharedMenu = [];
+        let categoriesToDisplay = ['Mains', 'Drinks', 'Desserts'];
 
         function displayCustomerMenu() {
             const grid = document.getElementById('customer-menu-grid');
             const navContainer = document.getElementById('customer-nav-container');
             grid.innerHTML = '';
-
-            const sharedMenu = JSON.parse(localStorage.getItem('productionMenu')) || [];
-            const categoriesToDisplay = JSON.parse(localStorage.getItem('categoryOrder')) || ['Mains', 'Drinks', 'Desserts'];
 
             sharedMenu.sort((a, b) => parseInt(a.order || 0) - parseInt(b.order || 0));
 
@@ -310,7 +316,21 @@
         }
 
         displayCustomerMenu();
-        window.addEventListener('storage', () => displayCustomerMenu());
+
+        onSnapshot(doc(db, 'settings', 'categories'), (snapshot) => {
+            if (snapshot.exists() && Array.isArray(snapshot.data().order)) {
+                categoriesToDisplay = snapshot.data().order;
+                displayCustomerMenu();
+            }
+        }, (error) => console.error('Category listener error:', error));
+
+        onSnapshot(collection(db, 'menuItems'), (snapshot) => {
+            sharedMenu = snapshot.docs.map(menuDoc => ({
+                id: menuDoc.id,
+                ...menuDoc.data()
+            }));
+            displayCustomerMenu();
+        }, (error) => console.error('Menu listener error:', error));
     </script>
 </body>
 </html>
