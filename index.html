@@ -46,6 +46,31 @@
             border-right: 1px solid #1e293b;
         }
 
+        .sidebar-spacer {
+            flex: 1;
+        }
+
+        .btn-view-menu {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            background: #f8fafc;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-view-menu:hover {
+            background: #ffffff;
+            border-color: #ffffff;
+        }
+
         .sidebar h2 {
             font-size: 18px;
             font-weight: 700;
@@ -399,6 +424,9 @@
                 </div>
                 <button type="submit" class="btn-primary">Add To Menu</button>
             </form>
+
+            <div class="sidebar-spacer"></div>
+            <a href="menu.html" class="btn-view-menu">View Customer Menu</a>
         </aside>
 
         <!-- ΚΥΡΙΩΣ DASHBOARD -->
