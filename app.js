@@ -128,7 +128,7 @@ function renderDashboard() {
             row.style.backgroundColor = "rgba(239, 68, 68, 0.05)";
         }
 
-        const hideIcon = item.hidden ? '🙈 Unstock' : '👁️ Stocked';
+        const hideIcon = item.hidden ? 'Unstock' : 'Stocked';
 
         row.innerHTML = `
             <td>
