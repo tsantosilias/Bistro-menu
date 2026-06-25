@@ -160,7 +160,7 @@
         /* ΣΤΟΙΧΕΙΟ ΠΙΑΤΟΥ */
         .menu-item { 
             display: flex; 
-            flex-direction: column; 
+            flex-direction: row; 
             gap: 8px; 
             width: 100%; 
             padding: 16px;
@@ -169,11 +169,28 @@
             border-radius: 14px;
             box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
         }
+
+        .item-photo {
+            width: 72px;
+            height: 72px;
+            flex: 0 0 72px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #f1f5f9;
+        }
+
+        .item-content {
+            min-width: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
         
         .item-header { 
             display: flex; 
             justify-content: space-between; 
-            align-items: baseline; 
+            align-items: flex-end; 
             gap: 8px;
         }
         
@@ -184,6 +201,7 @@
             color: #0f172a; 
             letter-spacing: -0.2px;
             line-height: 1.25;
+            min-width: 0;
         }
         
         /* Minimal λεπτή διακεκομμένη γραμμή */
@@ -191,8 +209,8 @@
             flex-grow: 1; 
             border-bottom: 1px dashed #cbd5e1; 
             margin: 0 8px; 
-            position: relative;
-            top: -4px;
+            transform: translateY(-4px);
+            min-width: 24px;
         }
         
         /* Καθαρή, modern τιμή */
@@ -314,8 +332,15 @@
                 gap: 7px;
             }
 
+            .item-photo {
+                width: 68px;
+                height: 68px;
+                flex-basis: 68px;
+                border-radius: 10px;
+            }
+
             .item-header {
-                align-items: flex-start;
+                align-items: flex-end;
             }
 
             .item-description {
@@ -422,6 +447,9 @@
             itemDiv.className = 'menu-item';
             
             const descriptionContent = item.description ? item.description : '&nbsp;';
+            const imageHTML = item.imageUrl
+                ? `<img class="item-photo" src="${item.imageUrl}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'">`
+                : '';
             const badges = Array.isArray(item.badges) ? item.badges : [];
             const badgesHTML = badges.length > 0
                 ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${badge}">${badgeLabels[badge] || badge}</span>`).join('')}</div>`
@@ -436,13 +464,16 @@
                 : `color: #0f172a;`;
 
             itemDiv.innerHTML = `
-                <div class="item-header" style="${item.hidden ? 'opacity: 0.6;' : ''}">
-                    <span class="item-name" style="${nameStyle}">${item.name}</span>
-                    <span class="item-dots"></span>
-                    <span class="item-price">${priceHTML}</span>
+                ${imageHTML}
+                <div class="item-content">
+                    <div class="item-header" style="${item.hidden ? 'opacity: 0.6;' : ''}">
+                        <span class="item-name" style="${nameStyle}">${item.name}</span>
+                        <span class="item-dots"></span>
+                        <span class="item-price">${priceHTML}</span>
+                    </div>
+                    <div class="item-description" style="${item.hidden ? 'opacity: 0.5;' : ''}">${descriptionContent}</div>
+                    ${badgesHTML}
                 </div>
-                <div class="item-description" style="${item.hidden ? 'opacity: 0.5;' : ''}">${descriptionContent}</div>
-                ${badgesHTML}
             `;
             
             container.appendChild(itemDiv);

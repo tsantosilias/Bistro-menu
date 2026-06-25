@@ -20,6 +20,7 @@ import {
 const menuForm = document.getElementById('menu-form');
 const itemNameInput = document.getElementById('item-name');
 const itemDescriptionInput = document.getElementById('item-description'); 
+const itemImageUrlInput = document.getElementById('item-image-url');
 const itemPriceInput = document.getElementById('item-price');
 const itemCategorySelect = document.getElementById('item-category');
 const itemBadgeInputs = document.querySelectorAll('input[name="item-badge"]');
@@ -42,6 +43,7 @@ const editForm = document.getElementById('edit-form');
 const editItemId = document.getElementById('edit-item-id');
 const editItemName = document.getElementById('edit-item-name');
 const editItemDescription = document.getElementById('edit-item-description'); 
+const editItemImageUrl = document.getElementById('edit-item-image-url');
 const editItemPrice = document.getElementById('edit-item-price');
 const editItemCategory = document.getElementById('edit-item-category');
 const editItemBadgeInputs = document.querySelectorAll('input[name="edit-item-badge"]');
@@ -157,6 +159,7 @@ function renderDashboard() {
             <td>
                 <strong>${item.name}</strong> ${item.hidden ? '<span style="color: #ef4444; font-size: 11px; margin-left: 5px; font-weight: bold;">[OUT OF STOCK]</span>' : ''}
                 <div style="font-size: 13px; color: #64748b; font-weight: normal; margin-top: 4px;">${item.description || '<i>No description added.</i>'}</div>
+                ${item.imageUrl ? '<div style="font-size: 11px; color: #64748b; margin-top: 5px; font-weight: 600;">Photo added</div>' : ''}
                 ${renderAdminBadges(item.badges)}
             </td>
             <td><span class="badge ${item.category}">${item.category}</span></td>
@@ -245,12 +248,13 @@ menuForm.addEventListener('submit', async (e) => {
 
     const newItem = {
         name: itemNameInput.value.trim(), description: itemDescriptionInput.value.trim(), 
+        imageUrl: itemImageUrlInput.value.trim(),
         order: nextOrder, price: parseFloat(itemPriceInput.value), category: selectedCategory, hidden: false,
         badges: getCheckedBadgeValues(itemBadgeInputs)
     };
 
     await addDoc(menuItemsRef, newItem);
-    itemNameInput.value = ''; itemDescriptionInput.value = ''; itemPriceInput.value = '';
+    itemNameInput.value = ''; itemDescriptionInput.value = ''; itemImageUrlInput.value = ''; itemPriceInput.value = '';
     setCheckedBadgeValues(itemBadgeInputs, []);
     
     // Κλείνουμε αυτόματα το μενού στο κινητό μετά την καταχώρηση
@@ -280,6 +284,7 @@ function openEditModal(id) {
     editItemId.value = targetItem.id;
     editItemName.value = targetItem.name;
     editItemDescription.value = targetItem.description || ''; 
+    editItemImageUrl.value = targetItem.imageUrl || '';
     editItemPrice.value = targetItem.price;
     renderDropdowns(); 
     editItemCategory.value = targetItem.category;
@@ -299,6 +304,7 @@ editForm.addEventListener('submit', async (e) => {
         await updateDoc(doc(db, 'menuItems', idToUpdate), {
             name: editItemName.value.trim(),
             description: editItemDescription.value.trim(),
+            imageUrl: editItemImageUrl.value.trim(),
             price: parseFloat(editItemPrice.value),
             category: editItemCategory.value,
             badges: getCheckedBadgeValues(editItemBadgeInputs)
