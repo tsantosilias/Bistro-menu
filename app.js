@@ -445,7 +445,30 @@ subscribeToFirebase();
 // ============================================================================
 
 // Αυτό το update διασφαλίζει ότι το QR code θα δείχνει στο σωστό menu.html του GitHub Pages
-const targetCustomerMenuURL = window.location.href.replace("index.html", "menu.html").split('?')[0];
+function getCustomerMenuURL() {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.search = '';
+    currentUrl.hash = '';
+
+    if (currentUrl.pathname.endsWith('/')) {
+        currentUrl.pathname += 'menu.html';
+        return currentUrl.toString();
+    }
+
+    const pathParts = currentUrl.pathname.split('/');
+    const lastPart = pathParts[pathParts.length - 1];
+
+    if (lastPart.includes('.')) {
+        pathParts[pathParts.length - 1] = 'menu.html';
+    } else {
+        pathParts.push('menu.html');
+    }
+
+    currentUrl.pathname = pathParts.join('/');
+    return currentUrl.toString();
+}
+
+const targetCustomerMenuURL = getCustomerMenuURL();
 
 const qrContainer = document.getElementById("qr-code-element");
 if (qrContainer) {
