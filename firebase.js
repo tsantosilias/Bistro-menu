@@ -12,14 +12,6 @@ import {
     setDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-import {
-    getStorage,
-    ref as storageRef,
-    uploadBytes,
-    getDownloadURL,
-    deleteObject
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js";
-
 const firebaseConfig = {
     apiKey: "AIzaSyA9ZFz6YvXnYol9oG0aaIcQHpLkJp9mZXQ",
     authDomain: "bistro-menu-9345e.firebaseapp.com",
@@ -33,10 +25,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
-const storage = getStorage(app);
 
 export { db };
-export { storage };
 
 export {
     collection,
@@ -46,9 +36,5 @@ export {
     deleteDoc,
     doc,
     onSnapshot,
-    setDoc,
-    storageRef,
-    uploadBytes,
-    getDownloadURL,
-    deleteObject
+    setDoc
 };
