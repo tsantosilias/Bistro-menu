@@ -145,6 +145,31 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
 
+        .badge-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .badge-option {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 10px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .badge-option input {
+            width: auto;
+            accent-color: #f8fafc;
+        }
+
         .btn-primary {
             width: 100%;
             background: #334155;
@@ -385,6 +410,11 @@
         .modal-box .input-box input, .modal-box .input-box select, .modal-box .input-box textarea {
             background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a;
         }
+        .modal-box .badge-option {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #334155;
+        }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         
         .btn-secondary {
@@ -531,6 +561,15 @@
                     <label>Category</label>
                     <select id="item-category" required></select>
                 </div>
+                <div class="input-box">
+                    <label>Badges</label>
+                    <div class="badge-options">
+                        <label class="badge-option"><input type="checkbox" name="item-badge" value="popular"> Popular</label>
+                        <label class="badge-option"><input type="checkbox" name="item-badge" value="vegan"> Vegan</label>
+                        <label class="badge-option"><input type="checkbox" name="item-badge" value="vegetarian"> Vegetarian</label>
+                        <label class="badge-option"><input type="checkbox" name="item-badge" value="spicy"> Spicy</label>
+                    </div>
+                </div>
                 <button type="submit" class="btn-primary">Add To Menu</button>
             </form>
 
@@ -611,6 +650,15 @@
                 <div class="input-box">
                     <label>Category</label>
                     <select id="edit-item-category" required></select>
+                </div>
+                <div class="input-box">
+                    <label>Badges</label>
+                    <div class="badge-options">
+                        <label class="badge-option"><input type="checkbox" name="edit-item-badge" value="popular"> Popular</label>
+                        <label class="badge-option"><input type="checkbox" name="edit-item-badge" value="vegan"> Vegan</label>
+                        <label class="badge-option"><input type="checkbox" name="edit-item-badge" value="vegetarian"> Vegetarian</label>
+                        <label class="badge-option"><input type="checkbox" name="edit-item-badge" value="spicy"> Spicy</label>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" id="close-modal-btn" class="btn-secondary">Cancel</button>

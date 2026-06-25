@@ -22,6 +22,7 @@ const itemNameInput = document.getElementById('item-name');
 const itemDescriptionInput = document.getElementById('item-description'); 
 const itemPriceInput = document.getElementById('item-price');
 const itemCategorySelect = document.getElementById('item-category');
+const itemBadgeInputs = document.querySelectorAll('input[name="item-badge"]');
 const menuTableBody = document.getElementById('menu-table-body');
 const searchBar = document.getElementById('search-bar');
 const filterTabsContainer = document.getElementById('filter-tabs-container'); 
@@ -43,6 +44,7 @@ const editItemName = document.getElementById('edit-item-name');
 const editItemDescription = document.getElementById('edit-item-description'); 
 const editItemPrice = document.getElementById('edit-item-price');
 const editItemCategory = document.getElementById('edit-item-category');
+const editItemBadgeInputs = document.querySelectorAll('input[name="edit-item-badge"]');
 const closeModalBtn = document.getElementById('close-modal-btn');
 
 // ============================================================================
@@ -57,6 +59,25 @@ let categoryOrder = DEFAULT_CATEGORIES;
 let currentFilter = 'All'; 
 let currentSearchQuery = ''; 
 let hasAttemptedLocalMenuMigration = false;
+
+function getCheckedBadgeValues(inputs) {
+    return Array.from(inputs)
+        .filter(input => input.checked)
+        .map(input => input.value);
+}
+
+function setCheckedBadgeValues(inputs, badges = []) {
+    inputs.forEach(input => {
+        input.checked = badges.includes(input.value);
+    });
+}
+
+function renderAdminBadges(badges = []) {
+    if (!Array.isArray(badges) || badges.length === 0) return '';
+    return `<div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px;">
+        ${badges.map(badge => `<span style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #475569; background: #f1f5f9; border-radius: 999px; padding: 3px 7px;">${badge}</span>`).join('')}
+    </div>`;
+}
 
 // ============================================================================
 // 3. RESPONSIVE SIDEBAR INTERACTION (ΛΟΓΙΚΗ BURGER)
@@ -136,6 +157,7 @@ function renderDashboard() {
             <td>
                 <strong>${item.name}</strong> ${item.hidden ? '<span style="color: #ef4444; font-size: 11px; margin-left: 5px; font-weight: bold;">[OUT OF STOCK]</span>' : ''}
                 <div style="font-size: 13px; color: #64748b; font-weight: normal; margin-top: 4px;">${item.description || '<i>No description added.</i>'}</div>
+                ${renderAdminBadges(item.badges)}
             </td>
             <td><span class="badge ${item.category}">${item.category}</span></td>
             <td><strong>${parseFloat(item.price).toFixed(2)} €</strong></td>
@@ -223,11 +245,13 @@ menuForm.addEventListener('submit', async (e) => {
 
     const newItem = {
         name: itemNameInput.value.trim(), description: itemDescriptionInput.value.trim(), 
-        order: nextOrder, price: parseFloat(itemPriceInput.value), category: selectedCategory, hidden: false
+        order: nextOrder, price: parseFloat(itemPriceInput.value), category: selectedCategory, hidden: false,
+        badges: getCheckedBadgeValues(itemBadgeInputs)
     };
 
     await addDoc(menuItemsRef, newItem);
     itemNameInput.value = ''; itemDescriptionInput.value = ''; itemPriceInput.value = '';
+    setCheckedBadgeValues(itemBadgeInputs, []);
     
     // Κλείνουμε αυτόματα το μενού στο κινητό μετά την καταχώρηση
     closeMobileSidebar();
@@ -259,6 +283,7 @@ function openEditModal(id) {
     editItemPrice.value = targetItem.price;
     renderDropdowns(); 
     editItemCategory.value = targetItem.category;
+    setCheckedBadgeValues(editItemBadgeInputs, targetItem.badges || []);
     editModal.classList.remove('hidden');
 }
 window.openEditModal = openEditModal;
@@ -275,7 +300,8 @@ editForm.addEventListener('submit', async (e) => {
             name: editItemName.value.trim(),
             description: editItemDescription.value.trim(),
             price: parseFloat(editItemPrice.value),
-            category: editItemCategory.value
+            category: editItemCategory.value,
+            badges: getCheckedBadgeValues(editItemBadgeInputs)
         });
         editModal.classList.add('hidden');
     }
