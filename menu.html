@@ -196,17 +196,15 @@
             width: 100%; 
             padding: 14px;
             background: #ffffff;
-            border: 1px solid #eef2f7;
-            border-radius: 14px;
-            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
             cursor: pointer;
-            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+            transition: background 0.18s ease;
         }
 
         .menu-item:hover {
-            transform: translateY(-1px);
-            border-color: #dbe4ef;
-            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+            background: #f8fafc;
         }
 
         .item-photo {
@@ -487,7 +485,7 @@
                 height: calc(100svh - 28px);
                 min-height: 0;
                 max-height: none;
-                padding: 22px 8px 18px;
+                padding: 22px 2px 18px;
                 border-radius: 16px;
                 overflow-y: auto;
                 overscroll-behavior: contain;
@@ -508,9 +506,9 @@
 
             .categories {
                 top: -24px;
-                margin-left: -8px;
-                margin-right: -8px;
-                padding: 13px 8px;
+                margin-left: -2px;
+                margin-right: -2px;
+                padding: 13px 10px;
                 margin-bottom: 14px;
             }
 
@@ -520,8 +518,7 @@
             }
 
             .menu-item {
-                padding: 15px 12px;
-                border-radius: 12px;
+                padding: 16px 10px;
                 gap: 12px;
             }
 
