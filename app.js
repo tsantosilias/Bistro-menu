@@ -3,18 +3,13 @@
 
 import {
     db,
-    storage,
     collection,
     addDoc,
     updateDoc,
     deleteDoc,
     doc,
     onSnapshot,
-    setDoc,
-    storageRef,
-    uploadBytes,
-    getDownloadURL,
-    deleteObject
+    setDoc
 } from "./firebase.js";
 
 
@@ -58,6 +53,8 @@ const closeModalBtn = document.getElementById('close-modal-btn');
 // 2. STATE (ΜΝΗΜΗ ΕΦΑΡΜΟΓΗΣ)
 // ============================================================================
 const DEFAULT_CATEGORIES = ['Mains', 'Drinks', 'Desserts'];
+const CLOUDINARY_CLOUD_NAME = 'dzz4waa9e';
+const CLOUDINARY_UPLOAD_PRESET = 'bistro_menu_uploads';
 const menuItemsRef = collection(db, 'menuItems');
 const categoriesDocRef = doc(db, 'settings', 'categories');
 
@@ -86,32 +83,35 @@ function renderAdminBadges(badges = []) {
     </div>`;
 }
 
-function buildImagePath(file) {
-    const safeName = file.name.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
-    return `dish-images/${Date.now()}-${safeName}`;
-}
-
 async function uploadDishImage(file) {
-    if (!file) return { imageUrl: '', imagePath: '' };
-    const imagePath = buildImagePath(file);
-    const imageReference = storageRef(storage, imagePath);
-    await uploadBytes(imageReference, file);
-    const imageUrl = await getDownloadURL(imageReference);
-    return { imageUrl, imagePath };
+    if (!file) return { imageUrl: '', imagePublicId: '' };
+
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+    uploadData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    uploadData.append('folder', 'bistro-menu/dishes');
+
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: uploadData
+    });
+
+    if (!response.ok) {
+        const message = await response.text();
+        throw new Error(`Cloudinary upload failed: ${message}`);
+    }
+
+    const result = await response.json();
+    return {
+        imageUrl: result.secure_url,
+        imagePublicId: result.public_id
+    };
 }
 
 function getSelectedFile(input) {
     return input && input.files && input.files.length > 0 ? input.files[0] : null;
 }
 
-async function deleteDishImage(imagePath) {
-    if (!imagePath) return;
-    try {
-        await deleteObject(storageRef(storage, imagePath));
-    } catch (error) {
-        console.warn('Could not delete old image:', error);
-    }
-}
 
 // ============================================================================
 // 3. RESPONSIVE SIDEBAR INTERACTION (ΛΟΓΙΚΗ BURGER)
@@ -300,7 +300,7 @@ menuForm.addEventListener('submit', async (e) => {
         const newItem = {
             name: itemNameInput.value.trim(), description: itemDescriptionInput.value.trim(), 
             imageUrl: uploadedImage.imageUrl,
-            imagePath: uploadedImage.imagePath,
+            imagePublicId: uploadedImage.imagePublicId,
             order: nextOrder, price: parseFloat(itemPriceInput.value), category: selectedCategory, hidden: false,
             badges: getCheckedBadgeValues(itemBadgeInputs)
         };
@@ -313,7 +313,7 @@ menuForm.addEventListener('submit', async (e) => {
         closeMobileSidebar();
     } catch (error) {
         console.error('Could not add dish:', error);
-        alert('The dish could not be saved. If you added a photo, check that Firebase Storage is enabled and its rules allow uploads.');
+        alert('The dish could not be saved. If you added a photo, check your Cloudinary upload preset and internet connection.');
     } finally {
         if (submitButton) {
             submitButton.disabled = false;
@@ -327,8 +327,6 @@ menuForm.addEventListener('submit', async (e) => {
 // ============================================================================
 async function deleteItem(id) {
     if(confirm("Are you sure you want to remove this dish?")) {
-        const itemToDelete = menuItems.find(item => item.id === id);
-        if (itemToDelete) await deleteDishImage(itemToDelete.imagePath);
         await deleteDoc(doc(db, 'menuItems', id));
         const remainingItems = menuItems
             .filter(item => item.id !== id)
@@ -378,8 +376,7 @@ editForm.addEventListener('submit', async (e) => {
             if (newImageFile) {
                 const uploadedImage = await uploadDishImage(newImageFile);
                 imageUpdate.imageUrl = uploadedImage.imageUrl;
-                imageUpdate.imagePath = uploadedImage.imagePath;
-                await deleteDishImage(targetItem.imagePath);
+                imageUpdate.imagePublicId = uploadedImage.imagePublicId;
             }
 
             await updateDoc(doc(db, 'menuItems', idToUpdate), {
@@ -394,7 +391,7 @@ editForm.addEventListener('submit', async (e) => {
             editModal.classList.add('hidden');
         } catch (error) {
             console.error('Could not update dish:', error);
-            alert('The dish could not be updated. If you added a photo, check that Firebase Storage is enabled and its rules allow uploads.');
+            alert('The dish could not be updated. If you added a photo, check your Cloudinary upload preset and internet connection.');
         } finally {
             if (submitButton) {
                 submitButton.disabled = false;
