@@ -3,13 +3,18 @@
 
 import {
     db,
+    storage,
     collection,
     addDoc,
     updateDoc,
     deleteDoc,
     doc,
     onSnapshot,
-    setDoc
+    setDoc,
+    storageRef,
+    uploadBytes,
+    getDownloadURL,
+    deleteObject
 } from "./firebase.js";
 
 
@@ -20,7 +25,7 @@ import {
 const menuForm = document.getElementById('menu-form');
 const itemNameInput = document.getElementById('item-name');
 const itemDescriptionInput = document.getElementById('item-description'); 
-const itemImageUrlInput = document.getElementById('item-image-url');
+const itemImageFileInput = document.getElementById('item-image-file');
 const itemPriceInput = document.getElementById('item-price');
 const itemCategorySelect = document.getElementById('item-category');
 const itemBadgeInputs = document.querySelectorAll('input[name="item-badge"]');
@@ -43,7 +48,7 @@ const editForm = document.getElementById('edit-form');
 const editItemId = document.getElementById('edit-item-id');
 const editItemName = document.getElementById('edit-item-name');
 const editItemDescription = document.getElementById('edit-item-description'); 
-const editItemImageUrl = document.getElementById('edit-item-image-url');
+const editItemImageFile = document.getElementById('edit-item-image-file');
 const editItemPrice = document.getElementById('edit-item-price');
 const editItemCategory = document.getElementById('edit-item-category');
 const editItemBadgeInputs = document.querySelectorAll('input[name="edit-item-badge"]');
@@ -79,6 +84,29 @@ function renderAdminBadges(badges = []) {
     return `<div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px;">
         ${badges.map(badge => `<span style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #475569; background: #f1f5f9; border-radius: 999px; padding: 3px 7px;">${badge}</span>`).join('')}
     </div>`;
+}
+
+function buildImagePath(file) {
+    const safeName = file.name.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
+    return `dish-images/${Date.now()}-${safeName}`;
+}
+
+async function uploadDishImage(file) {
+    if (!file) return { imageUrl: '', imagePath: '' };
+    const imagePath = buildImagePath(file);
+    const imageReference = storageRef(storage, imagePath);
+    await uploadBytes(imageReference, file);
+    const imageUrl = await getDownloadURL(imageReference);
+    return { imageUrl, imagePath };
+}
+
+async function deleteDishImage(imagePath) {
+    if (!imagePath) return;
+    try {
+        await deleteObject(storageRef(storage, imagePath));
+    } catch (error) {
+        console.warn('Could not delete old image:', error);
+    }
 }
 
 // ============================================================================
@@ -245,16 +273,18 @@ menuForm.addEventListener('submit', async (e) => {
     e.preventDefault(); 
     const nextOrder = menuItems.length + 1;
     const selectedCategory = itemCategorySelect.value;
+    const uploadedImage = await uploadDishImage(itemImageFileInput.files[0]);
 
     const newItem = {
         name: itemNameInput.value.trim(), description: itemDescriptionInput.value.trim(), 
-        imageUrl: itemImageUrlInput.value.trim(),
+        imageUrl: uploadedImage.imageUrl,
+        imagePath: uploadedImage.imagePath,
         order: nextOrder, price: parseFloat(itemPriceInput.value), category: selectedCategory, hidden: false,
         badges: getCheckedBadgeValues(itemBadgeInputs)
     };
 
     await addDoc(menuItemsRef, newItem);
-    itemNameInput.value = ''; itemDescriptionInput.value = ''; itemImageUrlInput.value = ''; itemPriceInput.value = '';
+    itemNameInput.value = ''; itemDescriptionInput.value = ''; itemImageFileInput.value = ''; itemPriceInput.value = '';
     setCheckedBadgeValues(itemBadgeInputs, []);
     
     // Κλείνουμε αυτόματα το μενού στο κινητό μετά την καταχώρηση
@@ -266,6 +296,8 @@ menuForm.addEventListener('submit', async (e) => {
 // ============================================================================
 async function deleteItem(id) {
     if(confirm("Are you sure you want to remove this dish?")) {
+        const itemToDelete = menuItems.find(item => item.id === id);
+        if (itemToDelete) await deleteDishImage(itemToDelete.imagePath);
         await deleteDoc(doc(db, 'menuItems', id));
         const remainingItems = menuItems
             .filter(item => item.id !== id)
@@ -284,7 +316,7 @@ function openEditModal(id) {
     editItemId.value = targetItem.id;
     editItemName.value = targetItem.name;
     editItemDescription.value = targetItem.description || ''; 
-    editItemImageUrl.value = targetItem.imageUrl || '';
+    editItemImageFile.value = '';
     editItemPrice.value = targetItem.price;
     renderDropdowns(); 
     editItemCategory.value = targetItem.category;
@@ -301,14 +333,25 @@ editForm.addEventListener('submit', async (e) => {
     const targetItem = menuItems.find(item => item.id === idToUpdate);
 
     if (targetItem) {
+        const newImageFile = editItemImageFile.files[0];
+        const imageUpdate = {};
+
+        if (newImageFile) {
+            const uploadedImage = await uploadDishImage(newImageFile);
+            imageUpdate.imageUrl = uploadedImage.imageUrl;
+            imageUpdate.imagePath = uploadedImage.imagePath;
+            await deleteDishImage(targetItem.imagePath);
+        }
+
         await updateDoc(doc(db, 'menuItems', idToUpdate), {
             name: editItemName.value.trim(),
             description: editItemDescription.value.trim(),
-            imageUrl: editItemImageUrl.value.trim(),
             price: parseFloat(editItemPrice.value),
             category: editItemCategory.value,
-            badges: getCheckedBadgeValues(editItemBadgeInputs)
+            badges: getCheckedBadgeValues(editItemBadgeInputs),
+            ...imageUpdate
         });
+        editItemImageFile.value = '';
         editModal.classList.add('hidden');
     }
 });
