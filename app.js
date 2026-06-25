@@ -100,6 +100,10 @@ async function uploadDishImage(file) {
     return { imageUrl, imagePath };
 }
 
+function getSelectedFile(input) {
+    return input && input.files && input.files.length > 0 ? input.files[0] : null;
+}
+
 async function deleteDishImage(imagePath) {
     if (!imagePath) return;
     try {
@@ -195,9 +199,9 @@ function renderDashboard() {
             <td style="text-align: right;">
                 <div class="action-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                     <span class="drag-handle" style="margin-right: 10px;">☰</span>
-                    <button class="btn-row-edit" style="background: ${item.hidden ? '#64748b' : '#2a4a58'}; color: white;" onclick="toggleHideItem('${item.id}')">${hideIcon}</button>
-                    <button class="btn-row-edit" onclick="openEditModal('${item.id}')">Edit</button>
-                    <button class="btn-row-del" onclick="deleteItem('${item.id}')">Delete</button>
+                    <button class="btn-row-edit" style="background: ${item.hidden ? '#64748b' : '#2a4a58'}; color: white;" data-action="toggle-stock" data-id="${item.id}">${hideIcon}</button>
+                    <button class="btn-row-edit" data-action="edit" data-id="${item.id}">Edit</button>
+                    <button class="btn-row-del" data-action="delete" data-id="${item.id}">Delete</button>
                 </div>
             </td>
         `;
@@ -215,6 +219,16 @@ window.toggleHideItem = async function(id) {
         await updateDoc(doc(db, 'menuItems', id), { hidden: !item.hidden });
     }
 };
+
+menuTableBody.addEventListener('click', async (event) => {
+    const button = event.target.closest('button[data-action]');
+    if (!button) return;
+
+    const id = button.dataset.id;
+    if (button.dataset.action === 'toggle-stock') await window.toggleHideItem(id);
+    if (button.dataset.action === 'edit') openEditModal(id);
+    if (button.dataset.action === 'delete') await deleteItem(id);
+});
 
 function renderDropdowns() {
     const currentMainSel = itemCategorySelect.value;
@@ -271,24 +285,41 @@ function calculateCalculatedStats() {
 // ============================================================================
 menuForm.addEventListener('submit', async (e) => {
     e.preventDefault(); 
-    const nextOrder = menuItems.length + 1;
-    const selectedCategory = itemCategorySelect.value;
-    const uploadedImage = await uploadDishImage(itemImageFileInput.files[0]);
+    const submitButton = menuForm.querySelector('button[type="submit"]');
 
-    const newItem = {
-        name: itemNameInput.value.trim(), description: itemDescriptionInput.value.trim(), 
-        imageUrl: uploadedImage.imageUrl,
-        imagePath: uploadedImage.imagePath,
-        order: nextOrder, price: parseFloat(itemPriceInput.value), category: selectedCategory, hidden: false,
-        badges: getCheckedBadgeValues(itemBadgeInputs)
-    };
+    try {
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Saving...';
+        }
 
-    await addDoc(menuItemsRef, newItem);
-    itemNameInput.value = ''; itemDescriptionInput.value = ''; itemImageFileInput.value = ''; itemPriceInput.value = '';
-    setCheckedBadgeValues(itemBadgeInputs, []);
-    
-    // Κλείνουμε αυτόματα το μενού στο κινητό μετά την καταχώρηση
-    closeMobileSidebar();
+        const nextOrder = menuItems.length + 1;
+        const selectedCategory = itemCategorySelect.value;
+        const uploadedImage = await uploadDishImage(getSelectedFile(itemImageFileInput));
+
+        const newItem = {
+            name: itemNameInput.value.trim(), description: itemDescriptionInput.value.trim(), 
+            imageUrl: uploadedImage.imageUrl,
+            imagePath: uploadedImage.imagePath,
+            order: nextOrder, price: parseFloat(itemPriceInput.value), category: selectedCategory, hidden: false,
+            badges: getCheckedBadgeValues(itemBadgeInputs)
+        };
+
+        await addDoc(menuItemsRef, newItem);
+        itemNameInput.value = ''; itemDescriptionInput.value = ''; if (itemImageFileInput) itemImageFileInput.value = ''; itemPriceInput.value = '';
+        setCheckedBadgeValues(itemBadgeInputs, []);
+        
+        // Κλείνουμε αυτόματα το μενού στο κινητό μετά την καταχώρηση
+        closeMobileSidebar();
+    } catch (error) {
+        console.error('Could not add dish:', error);
+        alert('The dish could not be saved. If you added a photo, check that Firebase Storage is enabled and its rules allow uploads.');
+    } finally {
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Add To Menu';
+        }
+    }
 });
 
 // ============================================================================
@@ -316,7 +347,7 @@ function openEditModal(id) {
     editItemId.value = targetItem.id;
     editItemName.value = targetItem.name;
     editItemDescription.value = targetItem.description || ''; 
-    editItemImageFile.value = '';
+    if (editItemImageFile) editItemImageFile.value = '';
     editItemPrice.value = targetItem.price;
     renderDropdowns(); 
     editItemCategory.value = targetItem.category;
@@ -333,26 +364,43 @@ editForm.addEventListener('submit', async (e) => {
     const targetItem = menuItems.find(item => item.id === idToUpdate);
 
     if (targetItem) {
-        const newImageFile = editItemImageFile.files[0];
-        const imageUpdate = {};
+        const submitButton = editForm.querySelector('button[type="submit"]');
 
-        if (newImageFile) {
-            const uploadedImage = await uploadDishImage(newImageFile);
-            imageUpdate.imageUrl = uploadedImage.imageUrl;
-            imageUpdate.imagePath = uploadedImage.imagePath;
-            await deleteDishImage(targetItem.imagePath);
+        try {
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Saving...';
+            }
+
+            const newImageFile = getSelectedFile(editItemImageFile);
+            const imageUpdate = {};
+
+            if (newImageFile) {
+                const uploadedImage = await uploadDishImage(newImageFile);
+                imageUpdate.imageUrl = uploadedImage.imageUrl;
+                imageUpdate.imagePath = uploadedImage.imagePath;
+                await deleteDishImage(targetItem.imagePath);
+            }
+
+            await updateDoc(doc(db, 'menuItems', idToUpdate), {
+                name: editItemName.value.trim(),
+                description: editItemDescription.value.trim(),
+                price: parseFloat(editItemPrice.value),
+                category: editItemCategory.value,
+                badges: getCheckedBadgeValues(editItemBadgeInputs),
+                ...imageUpdate
+            });
+            if (editItemImageFile) editItemImageFile.value = '';
+            editModal.classList.add('hidden');
+        } catch (error) {
+            console.error('Could not update dish:', error);
+            alert('The dish could not be updated. If you added a photo, check that Firebase Storage is enabled and its rules allow uploads.');
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Save Changes';
+            }
         }
-
-        await updateDoc(doc(db, 'menuItems', idToUpdate), {
-            name: editItemName.value.trim(),
-            description: editItemDescription.value.trim(),
-            price: parseFloat(editItemPrice.value),
-            category: editItemCategory.value,
-            badges: getCheckedBadgeValues(editItemBadgeInputs),
-            ...imageUpdate
-        });
-        editItemImageFile.value = '';
-        editModal.classList.add('hidden');
     }
 });
 

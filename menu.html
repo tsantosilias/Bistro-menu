@@ -183,8 +183,8 @@
             min-width: 0;
             flex: 1;
             display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 8px 12px;
+            grid-template-columns: minmax(0, 70%) minmax(max-content, 30%);
+            gap: 4px 10px;
             align-items: start;
         }
         
@@ -230,7 +230,6 @@
             line-height: 1.5;
             margin-top: 2px;
             min-height: 18px; 
-            max-width: 70%;
             grid-column: 1 / 2;
         }
 
@@ -241,6 +240,7 @@
             grid-column: 2 / 3;
             justify-content: flex-end;
             align-self: end;
+            margin-top: 0;
         }
 
         .item-badge {
@@ -352,7 +352,6 @@
 
             .item-description {
                 font-size: 12px;
-                max-width: 70%;
             }
             }
 

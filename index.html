@@ -399,12 +399,16 @@
             background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);
             display: flex; align-items: center; justify-content: center; z-index: 1000;
             transition: all 0.3s ease;
+            padding: 18px;
+            overflow-y: auto;
         }
         .modal-overlay.hidden { display: none; }
         
         .modal-box {
             background: #ffffff; padding: 30px; border-radius: 12px;
             width: 100%; max-width: 460px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            max-height: calc(100vh - 36px);
+            overflow-y: auto;
         }
         .modal-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #0f172a; }
         .modal-box .input-box input, .modal-box .input-box select, .modal-box .input-box textarea {
