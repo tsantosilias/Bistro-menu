@@ -183,8 +183,8 @@
             min-width: 0;
             flex: 1;
             display: grid;
-            grid-template-columns: minmax(0, 70%) minmax(max-content, 30%);
-            gap: 4px 10px;
+            grid-template-columns: minmax(0, 1fr) max-content;
+            gap: 3px 8px;
             align-items: start;
         }
         
@@ -230,6 +230,7 @@
             line-height: 1.5;
             margin-top: 2px;
             min-height: 18px; 
+            max-width: 78%;
             grid-column: 1 / 2;
         }
 
@@ -352,6 +353,7 @@
 
             .item-description {
                 font-size: 12px;
+                max-width: 82%;
             }
             }
 
