@@ -651,6 +651,15 @@
         let currentLanguage = 'en';
         let sharedMenu = [];
         let categoriesToDisplay = ['Mains', 'Drinks', 'Desserts'];
+        let hasLoadedMenuItems = false;
+        let hasLoadError = false;
+        let restaurantSettings = {
+            title: 'The Bistro Menu',
+            subtitle: 'Fresh ingredients • Crafted daily',
+            note: 'Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.',
+            footerText: 'Prices include VAT. Ask our staff for daily specials and allergen information.',
+            contactLine: ''
+        };
         const itemModal = document.getElementById('customer-item-modal');
         const itemModalBody = document.getElementById('customer-modal-body');
         const itemModalClose = document.getElementById('customer-modal-close');
@@ -662,6 +671,8 @@
                 note: 'Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.',
                 footerTitle: 'Thank you for visiting',
                 footerText: 'Prices include VAT. Ask our staff for daily specials and allergen information.',
+                loading: 'Loading menu...',
+                error: 'We could not load the menu right now. Please try again shortly.',
                 all: 'All',
                 empty: 'Our kitchen is preparing updates. Check back shortly!',
                 emptyCategory: 'No items available in this category.',
@@ -748,12 +759,32 @@
             document.querySelectorAll('[data-i18n]').forEach((element) => {
                 element.textContent = t(element.dataset.i18n);
             });
+            applyRestaurantSettings();
             document.querySelectorAll('[data-lang]').forEach((button) => {
                 const isActive = button.dataset.lang === currentLanguage;
                 button.classList.toggle('active', isActive);
                 button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
             });
             displayCustomerMenu();
+        }
+
+        function applyRestaurantSettings() {
+            const title = restaurantSettings.title || t('title');
+            const subtitle = restaurantSettings.subtitle || t('subtitle');
+            const note = restaurantSettings.note || t('note');
+            const footerText = [restaurantSettings.footerText || t('footerText'), restaurantSettings.contactLine]
+                .filter(Boolean)
+                .join(' ');
+
+            const titleEl = document.querySelector('[data-i18n="title"]');
+            const subtitleEl = document.querySelector('[data-i18n="subtitle"]');
+            const noteEl = document.querySelector('[data-i18n="note"]');
+            const footerTextEl = document.querySelector('[data-i18n="footerText"]');
+
+            if (titleEl) titleEl.textContent = title;
+            if (subtitleEl) subtitleEl.textContent = subtitle;
+            if (noteEl) noteEl.textContent = note;
+            if (footerTextEl) footerTextEl.textContent = footerText;
         }
 
         function displayCustomerMenu() {
@@ -778,6 +809,16 @@
                 btn.onclick = () => filterCustomerMenu(cat);
                 navContainer.appendChild(btn);
             });
+
+            if (hasLoadError) {
+                grid.innerHTML = `<div class="no-items">${t('error')}</div>`;
+                return;
+            }
+
+            if (!hasLoadedMenuItems) {
+                grid.innerHTML = `<div class="no-items">${t('loading')}</div>`;
+                return;
+            }
 
             if (sharedMenu.length === 0) {
                 grid.innerHTML = `<div class="no-items">${t('empty')}</div>`;
@@ -914,15 +955,36 @@
                 categoriesToDisplay = snapshot.data().order;
                 displayCustomerMenu();
             }
-        }, (error) => console.error('Category listener error:', error));
+        }, (error) => {
+            console.error('Category listener error:', error);
+        });
+
+        onSnapshot(doc(db, 'settings', 'restaurant'), (snapshot) => {
+            if (snapshot.exists()) {
+                restaurantSettings = {
+                    ...restaurantSettings,
+                    ...snapshot.data()
+                };
+                applyRestaurantSettings();
+            }
+        }, (error) => {
+            console.error('Restaurant settings listener error:', error);
+        });
 
         onSnapshot(collection(db, 'menuItems'), (snapshot) => {
+            hasLoadedMenuItems = true;
+            hasLoadError = false;
             sharedMenu = snapshot.docs.map(menuDoc => ({
                 id: menuDoc.id,
                 ...menuDoc.data()
             }));
             displayCustomerMenu();
-        }, (error) => console.error('Menu listener error:', error));
+        }, (error) => {
+            console.error('Menu listener error:', error);
+            hasLoadedMenuItems = true;
+            hasLoadError = true;
+            displayCustomerMenu();
+        });
     </script>
 </body>
 </html>

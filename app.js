@@ -40,6 +40,13 @@ const adminLoginPassword = document.getElementById('admin-login-password');
 const adminLoginError = document.getElementById('admin-login-error');
 const adminLogoutButton = document.getElementById('admin-logout-btn');
 const adminUserName = document.getElementById('admin-user-name');
+const restaurantSettingsForm = document.getElementById('restaurant-settings-form');
+const settingMenuTitle = document.getElementById('setting-menu-title');
+const settingMenuSubtitle = document.getElementById('setting-menu-subtitle');
+const settingMenuNote = document.getElementById('setting-menu-note');
+const settingFooterText = document.getElementById('setting-footer-text');
+const settingContactLine = document.getElementById('setting-contact-line');
+const restaurantSettingsStatus = document.getElementById('restaurant-settings-status');
 
 const statTotalItems = document.getElementById('stat-total-items');
 const statTopCategory = document.getElementById('stat-top-category');
@@ -71,6 +78,7 @@ const CLOUDINARY_CLOUD_NAME = 'dzz4waa9e';
 const CLOUDINARY_UPLOAD_PRESET = 'bistro_menu_uploads';
 const menuItemsRef = collection(db, 'menuItems');
 const categoriesDocRef = doc(db, 'settings', 'categories');
+const restaurantDocRef = doc(db, 'settings', 'restaurant');
 
 let menuItems = [];
 let categoryOrder = DEFAULT_CATEGORIES;
@@ -79,6 +87,13 @@ let currentSearchQuery = '';
 let hasAttemptedLocalMenuMigration = false;
 let hasStartedAdminSession = false;
 let firebaseUnsubscribers = [];
+const DEFAULT_RESTAURANT_SETTINGS = {
+    title: 'The Bistro Menu',
+    subtitle: 'Fresh ingredients • Crafted daily',
+    note: 'Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.',
+    footerText: 'Prices include VAT. Ask our staff for daily specials and allergen information.',
+    contactLine: ''
+};
 
 function getCheckedBadgeValues(inputs) {
     return Array.from(inputs)
@@ -123,6 +138,21 @@ function usernameToAuthEmail(username) {
 function authEmailToUsername(email) {
     if (!email) return 'Admin';
     return email.endsWith('@bistro.local') ? email.replace('@bistro.local', '') : email;
+}
+
+function fillRestaurantSettingsForm(settings = {}) {
+    const data = { ...DEFAULT_RESTAURANT_SETTINGS, ...settings };
+    if (settingMenuTitle) settingMenuTitle.value = data.title || '';
+    if (settingMenuSubtitle) settingMenuSubtitle.value = data.subtitle || '';
+    if (settingMenuNote) settingMenuNote.value = data.note || '';
+    if (settingFooterText) settingFooterText.value = data.footerText || '';
+    if (settingContactLine) settingContactLine.value = data.contactLine || '';
+}
+
+function setRestaurantSettingsStatus(message = '', isError = false) {
+    if (!restaurantSettingsStatus) return;
+    restaurantSettingsStatus.textContent = message;
+    restaurantSettingsStatus.style.color = isError ? '#fca5a5' : '#94a3b8';
 }
 
 function renderAdminBadges(badges = []) {
@@ -462,6 +492,38 @@ editForm.addEventListener('submit', async (e) => {
 
 if (searchBar) searchBar.addEventListener('input', (e) => { currentSearchQuery = e.target.value; renderDashboard(); });
 
+if (restaurantSettingsForm) {
+    restaurantSettingsForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const submitButton = restaurantSettingsForm.querySelector('button[type="submit"]');
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Saving...';
+        }
+        setRestaurantSettingsStatus('Saving...');
+
+        try {
+            await setDoc(restaurantDocRef, {
+                title: settingMenuTitle.value.trim() || DEFAULT_RESTAURANT_SETTINGS.title,
+                subtitle: settingMenuSubtitle.value.trim() || DEFAULT_RESTAURANT_SETTINGS.subtitle,
+                note: settingMenuNote.value.trim() || DEFAULT_RESTAURANT_SETTINGS.note,
+                footerText: settingFooterText.value.trim() || DEFAULT_RESTAURANT_SETTINGS.footerText,
+                contactLine: settingContactLine.value.trim()
+            }, { merge: true });
+            setRestaurantSettingsStatus('Saved.');
+            setTimeout(() => setRestaurantSettingsStatus(''), 2200);
+        } catch (error) {
+            console.error('Could not save restaurant settings:', error);
+            setRestaurantSettingsStatus('Could not save restaurant info.', true);
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Save Info';
+            }
+        }
+    });
+}
+
 function subscribeToFirebase() {
     clearFirebaseSubscriptions();
 
@@ -497,7 +559,14 @@ function subscribeToFirebase() {
         renderDashboard();
     }, (error) => console.error('Menu listener error:', error));
 
-    firebaseUnsubscribers.push(unsubscribeCategories, unsubscribeMenuItems);
+    const unsubscribeRestaurant = onSnapshot(restaurantDocRef, (snapshot) => {
+        fillRestaurantSettingsForm(snapshot.exists() ? snapshot.data() : DEFAULT_RESTAURANT_SETTINGS);
+    }, (error) => {
+        console.error('Restaurant settings listener error:', error);
+        setRestaurantSettingsStatus('Could not load restaurant info.', true);
+    });
+
+    firebaseUnsubscribers.push(unsubscribeCategories, unsubscribeMenuItems, unsubscribeRestaurant);
 }
 
 if (adminLoginForm) {

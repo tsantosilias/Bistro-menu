@@ -193,6 +193,28 @@
             letter-spacing: 0.5px;
         }
 
+        .restaurant-settings {
+            padding-top: 18px;
+            border-top: 1px solid #24344f;
+        }
+
+        .restaurant-settings h3 {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #cbd5e1;
+            letter-spacing: 0.7px;
+            margin-bottom: 14px;
+        }
+
+        .settings-status {
+            min-height: 17px;
+            margin-top: 9px;
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
         .sidebar h2 {
             font-size: 18px;
             font-weight: 700;
@@ -705,6 +727,32 @@
                     <div id="qr-code-element"></div>
                     <button class="btn-qr-download" onclick="downloadMenuQR()">Download PNG</button>
                 </div>
+
+                <form class="restaurant-settings" id="restaurant-settings-form">
+                    <h3>Restaurant Info</h3>
+                    <div class="input-box">
+                        <label>Menu Title</label>
+                        <input type="text" id="setting-menu-title" placeholder="The Bistro Menu">
+                    </div>
+                    <div class="input-box">
+                        <label>Subtitle</label>
+                        <input type="text" id="setting-menu-subtitle" placeholder="Fresh ingredients • Crafted daily">
+                    </div>
+                    <div class="input-box">
+                        <label>Customer Note</label>
+                        <textarea id="setting-menu-note" rows="3" placeholder="Browse our current dishes below..."></textarea>
+                    </div>
+                    <div class="input-box">
+                        <label>Footer Text</label>
+                        <textarea id="setting-footer-text" rows="3" placeholder="Prices include VAT..."></textarea>
+                    </div>
+                    <div class="input-box">
+                        <label>Contact Line</label>
+                        <input type="text" id="setting-contact-line" placeholder="Instagram: @bistro • Tel: 2100000000">
+                    </div>
+                    <button type="submit" class="btn-primary">Save Info</button>
+                    <div class="settings-status" id="restaurant-settings-status"></div>
+                </form>
             </div>
         </aside>
 
