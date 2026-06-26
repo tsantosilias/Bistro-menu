@@ -753,6 +753,15 @@
                 .replace(/'/g, '&#039;');
         }
 
+        function safeClassName(value) {
+            return String(value || '').replace(/[^a-z0-9_-]/gi, '-');
+        }
+
+        function formatPrice(value) {
+            const price = Number.parseFloat(value);
+            return Number.isFinite(price) ? price.toFixed(2) : '0.00';
+        }
+
         function applyLanguage() {
             document.documentElement.lang = currentLanguage === 'el' ? 'el' : 'en';
             document.body.classList.toggle('lang-el', currentLanguage === 'el');
@@ -862,12 +871,12 @@
                 : '';
             const badges = Array.isArray(item.badges) ? item.badges : [];
             const badgesHTML = badges.length > 0
-                ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${badge}">${badgeLabel(badge)}</span>`).join('')}</div>`
+                ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${safeClassName(badge)}">${escapeHTML(badgeLabel(badge))}</span>`).join('')}</div>`
                 : '';
             
             const priceHTML = item.hidden 
                 ? `<span style="color: #ef4444; font-size: 13px; font-weight: 500; letter-spacing: 0;">${t('outOfStock')}</span>`
-                : `${parseFloat(item.price).toFixed(2)} €`;
+                : `${formatPrice(item.price)} €`;
 
             const nameStyle = item.hidden 
                 ? `color: #94a3b8; font-weight: 500; font-style: italic;` 
@@ -898,7 +907,7 @@
         function openItemModal(item) {
             const badges = Array.isArray(item.badges) ? item.badges : [];
             const badgesHTML = badges.length > 0
-                ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${badge}">${badgeLabel(badge)}</span>`).join('')}</div>`
+                ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${safeClassName(badge)}">${escapeHTML(badgeLabel(badge))}</span>`).join('')}</div>`
                 : '';
             const name = dishName(item);
             const description = dishDescription(item);
@@ -907,7 +916,7 @@
                 : '';
             const priceHTML = item.hidden
                 ? `<span style="color: #ef4444;">${t('outOfStock')}</span>`
-                : `${parseFloat(item.price).toFixed(2)} €`;
+                : `${formatPrice(item.price)} €`;
 
             itemModalBody.innerHTML = `
                 ${imageHTML}

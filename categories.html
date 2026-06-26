@@ -220,7 +220,7 @@
         const newCatInput = document.getElementById('new-cat-input');
         const categoryPageList = document.getElementById('category-page-list');
 
-        // Αρχικοποίηση του Drag and Drop για τις κατηγορίες
+        // Drag and drop writes the new category order directly to Firestore.
         const sortableCategories = new Sortable(categoryPageList, {
             animation: 150,
             ghostClass: 'sortable-ghost',
@@ -238,24 +238,29 @@
             }
         });
 
-        // ΣΧΕΔΙΑΣΗ ΚΑΤΗΓΟΡΙΩΝ
+        // Render categories with DOM nodes so custom names cannot inject markup.
         function renderCategoriesPage() {
             categoryPageList.innerHTML = '';
-            
+
             categoryOrder.forEach((cat) => {
                 const item = document.createElement('div');
                 item.className = 'category-item';
                 item.setAttribute('data-name', cat);
-                
-                item.innerHTML = `
-                    <span>${cat}</span>
-                    <span class="category-drag-handle">☰</span>
-                `;
+
+                const name = document.createElement('span');
+                name.textContent = cat;
+
+                const handle = document.createElement('span');
+                handle.className = 'category-drag-handle';
+                handle.textContent = '☰';
+
+                item.appendChild(name);
+                item.appendChild(handle);
                 categoryPageList.appendChild(item);
             });
         }
 
-        // ΠΡΟΣΘΗΚΗ ΝΕΑΣ ΚΑΤΗΓΟΡΙΑΣ
+        // Add a new category while keeping matching names case-insensitive.
         categoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newCat = newCatInput.value.trim();

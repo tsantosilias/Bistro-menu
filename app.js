@@ -158,8 +158,26 @@ function setRestaurantSettingsStatus(message = '', isError = false) {
 function renderAdminBadges(badges = []) {
     if (!Array.isArray(badges) || badges.length === 0) return '';
     return `<div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px;">
-        ${badges.map(badge => `<span style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #475569; background: #f1f5f9; border-radius: 999px; padding: 3px 7px;">${badge}</span>`).join('')}
+        ${badges.map(badge => `<span style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #475569; background: #f1f5f9; border-radius: 999px; padding: 3px 7px;">${escapeHTML(badge)}</span>`).join('')}
     </div>`;
+}
+
+function escapeHTML(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function safeClassName(value) {
+    return String(value || '').replace(/[^a-z0-9_-]/gi, '-');
+}
+
+function formatPrice(value) {
+    const price = Number.parseFloat(value);
+    return Number.isFinite(price) ? price.toFixed(2) : '0.00';
 }
 
 async function uploadDishImage(file) {
@@ -220,17 +238,18 @@ if (window.Sortable && menuTableBody) {
     new Sortable(menuTableBody, {
         animation: 150, ghostClass: 'sortable-ghost', handle: '.drag-handle', 
         onEnd: async function () {
-            let NewOrderedList = [];
+            const newlyOrderedItems = [];
             const rows = menuTableBody.querySelectorAll('tr');
             rows.forEach((row, index) => {
                 const id = row.getAttribute('data-id');
                 const item = menuItems.find(i => i.id === id);
-                if (item) { item.order = index + 1; NewOrderedList.push(item); }
+                if (item) { item.order = index + 1; newlyOrderedItems.push(item); }
             });
+            // Preserve hidden-by-filter items so a partial view reorder does not drop them.
             if (currentFilter !== 'All' || currentSearchQuery !== '') {
-                menuItems.forEach(item => { if (!NewOrderedList.some(n => n.id === item.id)) NewOrderedList.push(item); });
+                menuItems.forEach(item => { if (!newlyOrderedItems.some(n => n.id === item.id)) newlyOrderedItems.push(item); });
             }
-            menuItems = NewOrderedList;
+            menuItems = newlyOrderedItems;
             await Promise.all(menuItems.map((item, index) => 
                 updateDoc(doc(db, 'menuItems', item.id), { order: index + 1 })
             ));
@@ -252,7 +271,7 @@ function renderDashboard() {
 
     const filteredItems = menuItems.filter(item => {
         const matchesCategory = (currentFilter === 'All' || item.category === currentFilter);
-        const matchesSearch = item.name.toLowerCase().includes(currentSearchQuery.toLowerCase());
+        const matchesSearch = String(item.name || '').toLowerCase().includes(currentSearchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
     });
 
@@ -269,16 +288,17 @@ function renderDashboard() {
         }
 
         const hideIcon = item.hidden ? 'Unstock' : 'Stocked';
+        const categoryClass = safeClassName(item.category);
 
         row.innerHTML = `
             <td>
-                <strong>${item.name}</strong> ${item.hidden ? '<span style="color: #ef4444; font-size: 11px; margin-left: 5px; font-weight: bold;">[OUT OF STOCK]</span>' : ''}
-                <div style="font-size: 13px; color: #64748b; font-weight: normal; margin-top: 4px;">${item.description || '<i>No description added.</i>'}</div>
+                <strong>${escapeHTML(item.name)}</strong> ${item.hidden ? '<span style="color: #ef4444; font-size: 11px; margin-left: 5px; font-weight: bold;">[OUT OF STOCK]</span>' : ''}
+                <div style="font-size: 13px; color: #64748b; font-weight: normal; margin-top: 4px;">${item.description ? escapeHTML(item.description) : '<i>No description added.</i>'}</div>
                 ${item.imageUrl ? '<div style="font-size: 11px; color: #64748b; margin-top: 5px; font-weight: 600;">Photo added</div>' : ''}
                 ${renderAdminBadges(item.badges)}
             </td>
-            <td><span class="badge ${item.category}">${item.category}</span></td>
-            <td><strong>${parseFloat(item.price).toFixed(2)} €</strong></td>
+            <td><span class="badge ${categoryClass}">${escapeHTML(item.category)}</span></td>
+            <td><strong>${formatPrice(item.price)} €</strong></td>
             <td style="text-align: right;">
                 <div class="action-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                     <span class="drag-handle" style="margin-right: 10px;">☰</span>
@@ -394,7 +414,7 @@ menuForm.addEventListener('submit', async (e) => {
         itemNameInput.value = ''; itemNameElInput.value = ''; itemDescriptionInput.value = ''; itemDescriptionElInput.value = ''; if (itemImageFileInput) itemImageFileInput.value = ''; itemPriceInput.value = '';
         setCheckedBadgeValues(itemBadgeInputs, []);
         
-        // Κλείνουμε αυτόματα το μενού στο κινητό μετά την καταχώρηση
+        // Close the mobile drawer after a successful dish add.
         closeMobileSidebar();
     } catch (error) {
         console.error('Could not add dish:', error);
@@ -546,6 +566,7 @@ function subscribeToFirebase() {
             hasAttemptedLocalMenuMigration = true;
             const savedMenu = JSON.parse(localStorage.getItem('productionMenu') || '[]');
             if (Array.isArray(savedMenu) && savedMenu.length > 0) {
+                // One-time migration path for users who had menu data before Firestore sync.
                 await Promise.all(savedMenu.map(({ id, ...item }) => addDoc(menuItemsRef, item)));
                 localStorage.removeItem('productionMenu');
                 return;
@@ -642,7 +663,7 @@ onAuthStateChanged(auth, (user) => {
 // PREMIUM QR CODE INITIALIZATION & ENGINE FUNCTIONS (Πλήρως Διορθωμένο)
 // ============================================================================
 
-// Αυτό το update διασφαλίζει ότι το QR code θα δείχνει στο σωστό menu.html του GitHub Pages
+// Build the customer-facing menu URL from the current admin page location.
 function getCustomerMenuURL() {
     const currentUrl = new URL(window.location.href);
     currentUrl.search = '';
