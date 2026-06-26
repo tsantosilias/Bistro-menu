@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bistro Admin Dashboard</title>
     
-    <!-- Google Fonts: Εισαγωγή της Inter για απόλυτα clean & premium look -->
+    <!-- Google Fonts: clean admin UI with a restrained editorial heading font. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
     
     <style>
         /* ======================================================================
@@ -18,7 +18,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
         }
 
         body {
@@ -61,10 +61,13 @@
         }
 
         .auth-card h1 {
+            font-family: 'Playfair Display', serif;
             font-size: 24px;
+            font-style: italic;
+            font-weight: 600;
             color: #0f172a;
             margin-bottom: 8px;
-            letter-spacing: -0.5px;
+            letter-spacing: 0;
         }
 
         .auth-card p {
@@ -216,10 +219,12 @@
         }
 
         .sidebar h2 {
-            font-size: 18px;
-            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-style: italic;
+            font-weight: 600;
             color: #ffffff;
-            letter-spacing: -0.3px;
+            letter-spacing: 0;
             margin-bottom: 5px;
         }
 
@@ -232,10 +237,10 @@
 
         .input-box label {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             color: #94a3b8;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.08em;
         }
 
         .input-box input, 
@@ -247,7 +252,11 @@
             border: 1px solid #334155;
             border-radius: 8px;
             color: #ffffff;
+            font-family: 'Inter', system-ui, sans-serif;
             font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0;
+            line-height: 1.45;
             transition: all 0.2s ease;
             outline: none;
         }
@@ -255,8 +264,8 @@
         .input-box input:focus, 
         .input-box select:focus, 
         .input-box textarea:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            border-color: #94a3b8;
+            box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.14);
         }
 
         .badge-options {
@@ -298,6 +307,19 @@
         }
         .btn-primary:hover { background: #475569; border-color: #64748b; }
 
+        .sidebar .btn-primary {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: #ffffff;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+
+        .sidebar .btn-primary:hover {
+            background: #e2e8f0;
+            border-color: #e2e8f0;
+        }
+
         /* ======================================================================
            MAIN CONTENT & DYNAMIC CARDS
            ====================================================================== */
@@ -307,10 +329,12 @@
         }
 
         .top-header h1 {
+            font-family: 'Playfair Display', serif;
             font-size: 26px;
-            font-weight: 700;
+            font-style: italic;
+            font-weight: 600;
             color: #0f172a;
-            letter-spacing: -0.5px;
+            letter-spacing: 0;
         }
 
         #search-bar {
@@ -524,7 +548,15 @@
             max-height: calc(100vh - 36px);
             overflow-y: auto;
         }
-        .modal-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #0f172a; }
+        .modal-box h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-style: italic;
+            font-weight: 600;
+            letter-spacing: 0;
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
         .modal-box .input-box input, .modal-box .input-box select, .modal-box .input-box textarea {
             background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a;
         }

@@ -10,6 +10,22 @@
     <link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Greek:wght@400;500;600;700;800&family=Playball&family=Playfair+Display:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
     
     <style>
+        @font-face {
+            font-family: 'Arrose';
+            src: url('fonts/arrose/Arrose-m210m.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Arrose';
+            src: url('fonts/arrose/ArroseItalic-7OrzK.ttf') format('truetype');
+            font-weight: 400;
+            font-style: italic;
+            font-display: swap;
+        }
+
         /* ΓΕΝΙΚΑ ΣΤΥΛ & ΚΑΘΑΡΗ ΓΡΑΜΜΑΤΟΣΕΙΡΑ */
         * { 
             box-sizing: border-box; 
@@ -91,24 +107,56 @@
         }
 
         body.lang-el h1 {
-            font-family: 'GFS Didot', 'Noto Sans Greek', serif;
+            font-family: 'Arrose', 'GFS Didot', 'Noto Sans Greek', serif;
+            font-size: clamp(28px, 6vw, 40px);
             font-style: normal;
             letter-spacing: 0;
+            line-height: 1.08;
         }
 
         body.lang-el .category-section-title {
-            font-family: 'GFS Didot', 'Noto Sans Greek', serif;
+            font-family: 'Arrose', 'GFS Didot', 'Noto Sans Greek', serif;
+            font-size: clamp(32px, 8vw, 44px);
             font-style: normal;
             font-weight: 400;
+            line-height: 1.08;
         }
 
-        body.lang-el .cat-btn,
-        body.lang-el .item-name,
         body.lang-el .item-description,
         body.lang-el .item-badge,
         body.lang-el .modal-description,
         body.lang-el .menu-footer {
             font-family: 'Noto Sans Greek', 'Inter', sans-serif;
+        }
+
+        body.lang-el .item-name,
+        body.lang-el .modal-title-row h2 {
+            font-family: 'Arrose', 'GFS Didot', 'Noto Sans Greek', serif;
+            font-style: normal;
+            font-weight: 400;
+            letter-spacing: 0;
+        }
+
+        body.lang-el .cat-btn {
+            font-family: 'Inter', 'Noto Sans Greek', sans-serif;
+            font-size: clamp(12.5px, 2.8vw, 13.5px);
+            font-style: normal;
+            font-weight: 600;
+            letter-spacing: 0;
+            line-height: 1.15;
+            text-transform: none;
+            padding-inline: clamp(15px, 4vw, 19px);
+        }
+
+        body.lang-el .item-name {
+            font-size: clamp(21px, 4.9vw, 25px);
+            letter-spacing: 0.025em;
+            line-height: 1.14;
+        }
+
+        body.lang-el .modal-title-row h2 {
+            font-size: clamp(25px, 6vw, 31px);
+            line-height: 1.15;
         }
         
         /* ΤΙΤΛΟΣ ΜΕΝΟΥ (Elegant Serif) */
@@ -169,9 +217,14 @@
             padding-top: 20px;
             padding-bottom: 20px; 
             z-index: 10;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid transparent;
             margin-bottom: 18px;
-            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.72);
+            box-shadow: none;
+        }
+
+        .categories.is-sticky {
+            border-bottom-color: #f1f5f9;
+            box-shadow: 0 1px 0 rgba(15, 23, 42, 0.12);
         }
         
         /* Κρύβουμε τη μπάρα σκρολαρίσματος */
@@ -180,24 +233,30 @@
         
         /* ΚΟΜΨΑ MINIMAL ΚΟΥΜΠΙΑ */
         .cat-btn { 
-            padding: 9px 20px; 
-            border: 1px solid #e2e8f0; 
-            background: #f8fafc; 
+            padding: 8px 19px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            background: #ffffff;
             cursor: pointer; 
-            border-radius: 20px; 
-            font-size: 13.5px; 
+            border-radius: 999px;
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            font-style: italic;
             font-weight: 600;
-            color: #475569; 
-            transition: all 0.2s ease; 
+            letter-spacing: 0;
+            text-transform: none;
+            color: #334155;
+            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, transform 0.2s ease;
             white-space: nowrap; 
             flex-shrink: 0; 
+            box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
         }
         
         .cat-btn.active, .cat-btn:hover { 
             background: #0f172a; 
             color: #ffffff; 
             border-color: #0f172a; 
-            box-shadow: 0 5px 10px rgba(15, 23, 42, 0.1);
+            box-shadow: 0 1px 0 rgba(15, 23, 42, 0.16);
+            transform: translateY(-1px);
         }
         
         /* EDIT HERE: Premium Italic Τίτλοι Κατηγοριών με τη σωστή γραμματοσειρά */
@@ -297,27 +356,31 @@
             gap: 14px;
         }
         
-        /* Καθαρό, modern όνομα πιάτου */
-        .item-name { 
-            font-size: clamp(15px, 3.5vw, 16px); 
-            font-weight: 800; 
+        /* Elegant dish names, matched to the restaurant-menu title style. */
+        .item-name {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(18px, 4vw, 20px);
+            font-style: italic;
+            font-weight: 600;
             color: #0f172a; 
-            letter-spacing: -0.2px;
-            line-height: 1.25;
+            letter-spacing: 0;
+            line-height: 1.18;
             min-width: 0;
             flex: 1;
-            padding-top: 5px;
+            padding-top: 3px;
         }
         
-        /* Καθαρή, modern τιμή */
+        /* Compact tabular prices keep the right edge calm while scanning the menu. */
         .item-price { 
-            font-size: clamp(16px, 3.8vw, 18px); 
-            font-weight: 800; 
-            color: #0f172a; 
+            font-family: 'Inter', 'Noto Sans Greek', sans-serif;
+            font-size: clamp(14px, 3.4vw, 16px);
+            font-weight: 700;
+            color: #1e293b;
             white-space: nowrap; 
             font-variant-numeric: tabular-nums;
-            line-height: 1;
-            padding-top: 1px;
+            letter-spacing: 0.2px;
+            line-height: 1.1;
+            padding-top: 5px;
         }
         
         /* Καθαρή περιγραφή */
@@ -449,19 +512,24 @@
         }
 
         .modal-title-row h2 {
+            font-family: 'Playfair Display', serif;
             font-size: clamp(24px, 5vw, 30px);
+            font-style: italic;
+            font-weight: 600;
             line-height: 1.2;
             color: #0f172a;
-            letter-spacing: -0.3px;
+            letter-spacing: 0;
         }
 
         .modal-price {
-            color: #0f172a;
-            font-weight: 800;
+            font-family: 'Inter', 'Noto Sans Greek', sans-serif;
+            color: #1e293b;
+            font-weight: 700;
             white-space: nowrap;
-            font-size: 22px;
+            font-size: 20px;
             line-height: 1;
             font-variant-numeric: tabular-nums;
+            letter-spacing: 0.2px;
             padding-top: 4px;
         }
 
@@ -542,7 +610,6 @@
                 margin-right: -2px;
                 padding: 12px 10px 12px;
                 margin-bottom: 8px;
-                box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
                 background: rgba(255, 255, 255, 0.98);
             }
 
@@ -551,9 +618,30 @@
                 font-size: 13.5px;
             }
 
+            body.lang-el .cat-btn {
+                font-size: clamp(12px, 3.7vw, 13px);
+                padding: 8px 15px;
+                line-height: 1.15;
+            }
+
+            body.lang-el .item-name {
+                font-size: clamp(21px, 6.2vw, 23px);
+                letter-spacing: 0.02em;
+                line-height: 1.12;
+            }
+
+            body.lang-el .modal-title-row h2 {
+                font-size: clamp(25px, 7vw, 29px);
+                line-height: 1.12;
+            }
+
             .category-section-title {
                 margin-top: 24px;
                 margin-bottom: 12px;
+            }
+
+            body.lang-el .category-section-title {
+                font-size: clamp(30px, 10vw, 39px);
             }
 
             .menu-item {
@@ -663,6 +751,8 @@
         const itemModal = document.getElementById('customer-item-modal');
         const itemModalBody = document.getElementById('customer-modal-body');
         const itemModalClose = document.getElementById('customer-modal-close');
+        const menuWrapper = document.querySelector('.menu-wrapper');
+        const navContainer = document.getElementById('customer-nav-container');
         const translations = {
             en: {
                 brand: 'Bistro',
@@ -730,6 +820,16 @@
 
         function categoryLabel(category) {
             return translations[currentLanguage].categories[category] || category;
+        }
+
+        function categorySectionLabel(category) {
+            const label = categoryLabel(category);
+            if (currentLanguage !== 'el') return label;
+
+            return label
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLocaleUpperCase('el-GR');
         }
 
         function badgeLabel(badge) {
@@ -840,7 +940,7 @@
                     if (catItems.length > 0) {
                         const titleDiv = document.createElement('div');
                         titleDiv.className = 'category-section-title';
-                        titleDiv.textContent = categoryLabel(cat);
+                        titleDiv.textContent = categorySectionLabel(cat);
                         grid.appendChild(titleDiv);
 
                         catItems.forEach(item => appendItemToGrid(grid, item));
@@ -950,6 +1050,24 @@
             displayCustomerMenu();
         }
 
+        function initializeStickyCategoryShadow() {
+            if (!menuWrapper || !navContainer || !window.IntersectionObserver) return;
+
+            const stickySentinel = document.createElement('div');
+            stickySentinel.setAttribute('aria-hidden', 'true');
+            navContainer.before(stickySentinel);
+
+            // The 1px shadow appears only after the category tabs begin sticking.
+            const observer = new IntersectionObserver(([entry]) => {
+                navContainer.classList.toggle('is-sticky', !entry.isIntersecting);
+            }, {
+                root: menuWrapper,
+                threshold: 0
+            });
+
+            observer.observe(stickySentinel);
+        }
+
         document.querySelectorAll('[data-lang]').forEach((button) => {
             button.addEventListener('click', () => {
                 currentLanguage = button.dataset.lang;
@@ -958,6 +1076,7 @@
         });
 
         applyLanguage();
+        initializeStickyCategoryShadow();
 
         onSnapshot(doc(db, 'settings', 'categories'), (snapshot) => {
             if (snapshot.exists() && Array.isArray(snapshot.data().order)) {
