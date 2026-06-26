@@ -186,27 +186,31 @@ if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeMobileSidebar)
 // ============================================================================
 // 4. DRAG AND DROP CONTROLLER
 // ============================================================================
-const sortable = new Sortable(menuTableBody, {
-    animation: 150, ghostClass: 'sortable-ghost', handle: '.drag-handle', 
-    onEnd: async function () {
-        let NewOrderedList = [];
-        const rows = menuTableBody.querySelectorAll('tr');
-        rows.forEach((row, index) => {
-            const id = row.getAttribute('data-id');
-            const item = menuItems.find(i => i.id === id);
-            if (item) { item.order = index + 1; NewOrderedList.push(item); }
-        });
-        if (currentFilter !== 'All' || currentSearchQuery !== '') {
-            menuItems.forEach(item => { if (!NewOrderedList.some(n => n.id === item.id)) NewOrderedList.push(item); });
+if (window.Sortable && menuTableBody) {
+    new Sortable(menuTableBody, {
+        animation: 150, ghostClass: 'sortable-ghost', handle: '.drag-handle', 
+        onEnd: async function () {
+            let NewOrderedList = [];
+            const rows = menuTableBody.querySelectorAll('tr');
+            rows.forEach((row, index) => {
+                const id = row.getAttribute('data-id');
+                const item = menuItems.find(i => i.id === id);
+                if (item) { item.order = index + 1; NewOrderedList.push(item); }
+            });
+            if (currentFilter !== 'All' || currentSearchQuery !== '') {
+                menuItems.forEach(item => { if (!NewOrderedList.some(n => n.id === item.id)) NewOrderedList.push(item); });
+            }
+            menuItems = NewOrderedList;
+            await Promise.all(menuItems.map((item, index) => 
+                updateDoc(doc(db, 'menuItems', item.id), { order: index + 1 })
+            ));
+            calculateCalculatedStats();
+            renderDashboard(); 
         }
-        menuItems = NewOrderedList;
-        await Promise.all(menuItems.map((item, index) => 
-            updateDoc(doc(db, 'menuItems', item.id), { order: index + 1 })
-        ));
-        calculateCalculatedStats();
-        renderDashboard(); 
-    }
-});
+    });
+} else {
+    console.warn('Sortable library did not load. Drag-and-drop ordering is disabled.');
+}
 
 // ============================================================================
 // 5. RENDER ENGINE
@@ -499,7 +503,7 @@ function subscribeToFirebase() {
 if (adminLoginForm) {
     adminLoginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        setLoginError('');
+        setLoginError('Signing in...');
 
         const submitButton = adminLoginForm.querySelector('button[type="submit"]');
         if (submitButton) {
@@ -508,15 +512,26 @@ if (adminLoginForm) {
         }
 
         try {
-            await signInWithEmailAndPassword(
-                auth,
-                usernameToAuthEmail(adminLoginUsername.value),
-                adminLoginPassword.value
+            const loginTimeout = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('auth-timeout')), 12000);
+            });
+
+            await Promise.race(
+                [
+                    signInWithEmailAndPassword(
+                        auth,
+                        usernameToAuthEmail(adminLoginUsername.value),
+                        adminLoginPassword.value
+                    ),
+                    loginTimeout
+                ]
             );
             adminLoginPassword.value = '';
         } catch (error) {
             console.error('Admin sign in failed:', error);
-            setLoginError(readableAuthError(error));
+            setLoginError(error.message === 'auth-timeout'
+                ? 'Login is taking too long. Check internet connection and Firebase Authentication setup.'
+                : readableAuthError(error));
         } finally {
             if (submitButton) {
                 submitButton.disabled = false;
@@ -585,8 +600,8 @@ function getCustomerMenuURL() {
 const targetCustomerMenuURL = getCustomerMenuURL();
 
 const qrContainer = document.getElementById("qr-code-element");
-if (qrContainer) {
-    const menuQRCodeInstance = new QRCode(qrContainer, {
+if (qrContainer && window.QRCode) {
+    new QRCode(qrContainer, {
         text: targetCustomerMenuURL,
         width: 100,
         height: 100,
@@ -594,6 +609,9 @@ if (qrContainer) {
         colorLight : "#ffffff",
         correctLevel : QRCode.CorrectLevel.H 
     });
+} else if (qrContainer) {
+    qrContainer.innerHTML = '<span style="font-size: 11px; color: #94a3b8;">QR unavailable</span>';
+    console.warn('QRCode library did not load. QR generation is disabled.');
 }
 
 // Download handler function με διπλό έλεγχο (img & canvas) για 100% επιτυχία
