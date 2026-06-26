@@ -783,8 +783,24 @@
             displayCustomerMenu();
         }
 
+        function openGoogleTranslatedMenu() {
+            const pageUrl = window.location.href;
+            if (pageUrl.startsWith('file:')) {
+                alert('Google Translate works after the site is online. Push to GitHub Pages and press GR there.');
+                return;
+            }
+
+            const translatedUrl = `https://translate.google.com/translate?sl=auto&tl=el&u=${encodeURIComponent(pageUrl)}`;
+            window.location.href = translatedUrl;
+        }
+
         document.querySelectorAll('[data-language]').forEach(button => {
             button.addEventListener('click', () => {
+                if (button.dataset.language === 'el') {
+                    openGoogleTranslatedMenu();
+                    return;
+                }
+
                 currentLanguage = button.dataset.language;
                 document.querySelectorAll('[data-language]').forEach(toggleButton => {
                     toggleButton.classList.toggle('active', toggleButton === button);
