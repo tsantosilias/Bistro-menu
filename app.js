@@ -19,7 +19,9 @@ import {
 // ============================================================================
 const menuForm = document.getElementById('menu-form');
 const itemNameInput = document.getElementById('item-name');
+const itemNameElInput = document.getElementById('item-name-el');
 const itemDescriptionInput = document.getElementById('item-description'); 
+const itemDescriptionElInput = document.getElementById('item-description-el'); 
 const itemImageFileInput = document.getElementById('item-image-file');
 const itemPriceInput = document.getElementById('item-price');
 const itemCategorySelect = document.getElementById('item-category');
@@ -42,7 +44,9 @@ const editModal = document.getElementById('edit-modal');
 const editForm = document.getElementById('edit-form');
 const editItemId = document.getElementById('edit-item-id');
 const editItemName = document.getElementById('edit-item-name');
+const editItemNameEl = document.getElementById('edit-item-name-el');
 const editItemDescription = document.getElementById('edit-item-description'); 
+const editItemDescriptionEl = document.getElementById('edit-item-description-el'); 
 const editItemImageFile = document.getElementById('edit-item-image-file');
 const editItemPrice = document.getElementById('edit-item-price');
 const editItemCategory = document.getElementById('edit-item-category');
@@ -299,6 +303,8 @@ menuForm.addEventListener('submit', async (e) => {
 
         const newItem = {
             name: itemNameInput.value.trim(), description: itemDescriptionInput.value.trim(), 
+            nameEl: itemNameElInput.value.trim(),
+            descriptionEl: itemDescriptionElInput.value.trim(),
             imageUrl: uploadedImage.imageUrl,
             imagePublicId: uploadedImage.imagePublicId,
             order: nextOrder, price: parseFloat(itemPriceInput.value), category: selectedCategory, hidden: false,
@@ -306,7 +312,7 @@ menuForm.addEventListener('submit', async (e) => {
         };
 
         await addDoc(menuItemsRef, newItem);
-        itemNameInput.value = ''; itemDescriptionInput.value = ''; if (itemImageFileInput) itemImageFileInput.value = ''; itemPriceInput.value = '';
+        itemNameInput.value = ''; itemNameElInput.value = ''; itemDescriptionInput.value = ''; itemDescriptionElInput.value = ''; if (itemImageFileInput) itemImageFileInput.value = ''; itemPriceInput.value = '';
         setCheckedBadgeValues(itemBadgeInputs, []);
         
         // Κλείνουμε αυτόματα το μενού στο κινητό μετά την καταχώρηση
@@ -344,7 +350,9 @@ function openEditModal(id) {
 
     editItemId.value = targetItem.id;
     editItemName.value = targetItem.name;
+    editItemNameEl.value = targetItem.nameEl || '';
     editItemDescription.value = targetItem.description || ''; 
+    editItemDescriptionEl.value = targetItem.descriptionEl || '';
     if (editItemImageFile) editItemImageFile.value = '';
     editItemPrice.value = targetItem.price;
     renderDropdowns(); 
@@ -381,7 +389,9 @@ editForm.addEventListener('submit', async (e) => {
 
             await updateDoc(doc(db, 'menuItems', idToUpdate), {
                 name: editItemName.value.trim(),
+                nameEl: editItemNameEl.value.trim(),
                 description: editItemDescription.value.trim(),
+                descriptionEl: editItemDescriptionEl.value.trim(),
                 price: parseFloat(editItemPrice.value),
                 category: editItemCategory.value,
                 badges: getCheckedBadgeValues(editItemBadgeInputs),

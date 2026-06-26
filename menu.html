@@ -88,7 +88,7 @@
             text-align: center;
         }
 
-        .view-toggle {
+        .language-toggle {
             display: inline-flex;
             gap: 4px;
             padding: 4px;
@@ -98,12 +98,12 @@
             border-radius: 999px;
         }
 
-        .view-toggle-wrap {
+        .language-toggle-wrap {
             display: flex;
             justify-content: center;
         }
 
-        .view-toggle button {
+        .language-toggle button {
             border: none;
             background: transparent;
             color: #64748b;
@@ -114,7 +114,7 @@
             cursor: pointer;
         }
 
-        .view-toggle button.active {
+        .language-toggle button.active {
             background: #0f172a;
             color: #ffffff;
         }
@@ -325,54 +325,6 @@
         .item-badge.vegetarian { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
         .item-badge.spicy { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
 
-        .menu-grid.classic-view {
-            gap: 24px 46px;
-        }
-
-        .classic-view .menu-item {
-            display: block;
-            padding: 0 0 18px;
-            border: none;
-            border-radius: 0;
-            box-shadow: none;
-            background: transparent;
-        }
-
-        .classic-view .menu-item:hover {
-            transform: none;
-            box-shadow: none;
-            border-color: #eef2f7;
-        }
-
-        .classic-view .item-photo {
-            display: none;
-        }
-
-        .classic-view .item-content {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .classic-view .item-header {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 14px;
-        }
-
-        .classic-view .item-description {
-            display: block;
-            min-height: 0;
-            overflow: visible;
-            font-size: 13px;
-        }
-
-        .classic-view .item-badges {
-            justify-content: flex-end;
-            align-self: flex-end;
-            margin-top: 2px;
-        }
-        
         .no-items { 
             grid-column: 1 / -1; 
             text-align: center; 
@@ -573,12 +525,8 @@
                 font-size: 12px;
             }
 
-            .view-toggle {
+            .language-toggle {
                 margin-bottom: 14px;
-            }
-
-            .classic-view .menu-item {
-                padding-bottom: 16px;
             }
 
             .modal-photo {
@@ -617,10 +565,10 @@
             <p class="menu-note">Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.</p>
         </header>
 
-        <div class="view-toggle-wrap">
-            <div class="view-toggle" aria-label="Menu view">
-                <button type="button" class="active" data-view-mode="photo">Photo</button>
-                <button type="button" data-view-mode="classic">Classic</button>
+        <div class="language-toggle-wrap">
+            <div class="language-toggle" aria-label="Language">
+                <button type="button" class="active" data-language="en">EN</button>
+                <button type="button" data-language="el">GR</button>
             </div>
         </div>
 
@@ -650,24 +598,55 @@
         } from "./firebase.js";
 
         let customerFilter = 'All';
-        let viewMode = 'photo';
+        let currentLanguage = 'en';
         let sharedMenu = [];
         let categoriesToDisplay = ['Mains', 'Drinks', 'Desserts'];
         const itemModal = document.getElementById('customer-item-modal');
         const itemModalBody = document.getElementById('customer-modal-body');
         const itemModalClose = document.getElementById('customer-modal-close');
         const badgeLabels = {
-            popular: 'Popular',
-            vegan: 'Vegan',
-            vegetarian: 'Vegetarian',
-            spicy: 'Spicy'
+            en: {
+                popular: 'Popular',
+                vegan: 'Vegan',
+                vegetarian: 'Vegetarian',
+                spicy: 'Spicy'
+            },
+            el: {
+                popular: 'Δημοφιλές',
+                vegan: 'Vegan',
+                vegetarian: 'Vegetarian',
+                spicy: 'Πικάντικο'
+            }
         };
+        const uiText = {
+            en: {
+                all: 'All',
+                empty: 'Our kitchen is preparing updates. Check back shortly!',
+                emptyCategory: 'No items available in this category.',
+                outOfStock: 'Out of stock',
+                noDescription: 'No description available.'
+            },
+            el: {
+                all: 'Όλα',
+                empty: 'Η κουζίνα μας ετοιμάζει ενημερώσεις. Ελέγξτε ξανά σύντομα!',
+                emptyCategory: 'Δεν υπάρχουν διαθέσιμα πιάτα σε αυτή την κατηγορία.',
+                outOfStock: 'Εξαντλήθηκε',
+                noDescription: 'Δεν υπάρχει διαθέσιμη περιγραφή.'
+            }
+        };
+
+        function getDishName(item) {
+            return currentLanguage === 'el' && item.nameEl ? item.nameEl : item.name;
+        }
+
+        function getDishDescription(item) {
+            return currentLanguage === 'el' && item.descriptionEl ? item.descriptionEl : item.description;
+        }
 
         function displayCustomerMenu() {
             const grid = document.getElementById('customer-menu-grid');
             const navContainer = document.getElementById('customer-nav-container');
             grid.innerHTML = '';
-            grid.classList.toggle('classic-view', viewMode === 'classic');
 
             sharedMenu.sort((a, b) => parseInt(a.order || 0) - parseInt(b.order || 0));
 
@@ -675,7 +654,7 @@
             
             const allBtn = document.createElement('button');
             allBtn.className = `cat-btn ${customerFilter === 'All' ? 'active' : ''}`;
-            allBtn.textContent = 'All';
+            allBtn.textContent = uiText[currentLanguage].all;
             allBtn.onclick = () => filterCustomerMenu('All');
             navContainer.appendChild(allBtn);
 
@@ -688,7 +667,7 @@
             });
 
             if (sharedMenu.length === 0) {
-                grid.innerHTML = `<div class="no-items">Our kitchen is preparing updates. Check back shortly!</div>`;
+                grid.innerHTML = `<div class="no-items">${uiText[currentLanguage].empty}</div>`;
                 return;
             }
 
@@ -707,7 +686,7 @@
             } else {
                 const visibleItems = sharedMenu.filter(item => item.category === customerFilter);
                 if (visibleItems.length === 0) {
-                    grid.innerHTML = `<div class="no-items">No items available in this category.</div>`;
+                    grid.innerHTML = `<div class="no-items">${uiText[currentLanguage].emptyCategory}</div>`;
                     return;
                 }
                 visibleItems.forEach(item => appendItemToGrid(grid, item));
@@ -719,19 +698,19 @@
             itemDiv.className = 'menu-item';
             itemDiv.setAttribute('role', 'button');
             itemDiv.setAttribute('tabindex', '0');
-            itemDiv.setAttribute('aria-label', `View ${item.name}`);
+            itemDiv.setAttribute('aria-label', `View ${getDishName(item)}`);
             
-            const descriptionContent = item.description ? item.description : '&nbsp;';
+            const descriptionContent = getDishDescription(item) ? getDishDescription(item) : '&nbsp;';
             const imageHTML = item.imageUrl
-                ? `<img class="item-photo" src="${item.imageUrl}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'">`
+                ? `<img class="item-photo" src="${item.imageUrl}" alt="${getDishName(item)}" loading="lazy" onerror="this.style.display='none'">`
                 : '';
             const badges = Array.isArray(item.badges) ? item.badges : [];
             const badgesHTML = badges.length > 0
-                ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${badge}">${badgeLabels[badge] || badge}</span>`).join('')}</div>`
+                ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${badge}">${badgeLabels[currentLanguage][badge] || badge}</span>`).join('')}</div>`
                 : '';
             
             const priceHTML = item.hidden 
-                ? `<span style="color: #ef4444; font-size: 13px; font-weight: 500; letter-spacing: 0;">Out of stock</span>`
+                ? `<span style="color: #ef4444; font-size: 13px; font-weight: 500; letter-spacing: 0;">${uiText[currentLanguage].outOfStock}</span>`
                 : `${parseFloat(item.price).toFixed(2)} €`;
 
             const nameStyle = item.hidden 
@@ -742,7 +721,7 @@
                 ${imageHTML}
                 <div class="item-content">
                     <div class="item-header" style="${item.hidden ? 'opacity: 0.6;' : ''}">
-                        <span class="item-name" style="${nameStyle}">${item.name}</span>
+                        <span class="item-name" style="${nameStyle}">${getDishName(item)}</span>
                         <span class="item-price">${priceHTML}</span>
                     </div>
                     <div class="item-description" style="${item.hidden ? 'opacity: 0.5;' : ''}">${descriptionContent}</div>
@@ -763,23 +742,23 @@
         function openItemModal(item) {
             const badges = Array.isArray(item.badges) ? item.badges : [];
             const badgesHTML = badges.length > 0
-                ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${badge}">${badgeLabels[badge] || badge}</span>`).join('')}</div>`
+                ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${badge}">${badgeLabels[currentLanguage][badge] || badge}</span>`).join('')}</div>`
                 : '';
             const imageHTML = item.imageUrl
-                ? `<img class="modal-photo" src="${item.imageUrl}" alt="${item.name}">`
+                ? `<img class="modal-photo" src="${item.imageUrl}" alt="${getDishName(item)}">`
                 : '';
             const priceHTML = item.hidden
-                ? `<span style="color: #ef4444;">Out of stock</span>`
+                ? `<span style="color: #ef4444;">${uiText[currentLanguage].outOfStock}</span>`
                 : `${parseFloat(item.price).toFixed(2)} €`;
 
             itemModalBody.innerHTML = `
                 ${imageHTML}
                 <div class="modal-content">
                     <div class="modal-title-row">
-                        <h2>${item.name}</h2>
+                        <h2>${getDishName(item)}</h2>
                         <span class="modal-price">${priceHTML}</span>
                     </div>
-                    <p class="modal-description">${item.description || 'No description available.'}</p>
+                    <p class="modal-description">${getDishDescription(item) || uiText[currentLanguage].noDescription}</p>
                     ${badgesHTML}
                 </div>
             `;
@@ -804,10 +783,10 @@
             displayCustomerMenu();
         }
 
-        document.querySelectorAll('[data-view-mode]').forEach(button => {
+        document.querySelectorAll('[data-language]').forEach(button => {
             button.addEventListener('click', () => {
-                viewMode = button.dataset.viewMode;
-                document.querySelectorAll('[data-view-mode]').forEach(toggleButton => {
+                currentLanguage = button.dataset.language;
+                document.querySelectorAll('[data-language]').forEach(toggleButton => {
                     toggleButton.classList.toggle('active', toggleButton === button);
                 });
                 displayCustomerMenu();
