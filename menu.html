@@ -840,6 +840,16 @@
             return currentLanguage === 'el' && item.nameEl ? item.nameEl : item.name;
         }
 
+        function displayDishName(item) {
+            const name = dishName(item);
+            if (currentLanguage !== 'el') return name;
+
+            return name
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLocaleUpperCase('el-GR');
+        }
+
         function dishDescription(item) {
             return currentLanguage === 'el' && item.descriptionEl ? item.descriptionEl : item.description;
         }
@@ -961,7 +971,7 @@
             itemDiv.className = 'menu-item';
             itemDiv.setAttribute('role', 'button');
             itemDiv.setAttribute('tabindex', '0');
-            const name = dishName(item);
+            const name = displayDishName(item);
             const description = dishDescription(item);
             itemDiv.setAttribute('aria-label', `${t('viewItem')} ${name}`);
             
@@ -1009,7 +1019,7 @@
             const badgesHTML = badges.length > 0
                 ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${safeClassName(badge)}">${escapeHTML(badgeLabel(badge))}</span>`).join('')}</div>`
                 : '';
-            const name = dishName(item);
+            const name = displayDishName(item);
             const description = dishDescription(item);
             const imageHTML = item.imageUrl
                 ? `<img class="modal-photo" src="${escapeHTML(item.imageUrl)}" alt="${escapeHTML(name)}">`
