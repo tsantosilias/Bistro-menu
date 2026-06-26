@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playball&family=Playfair+Display:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Greek:wght@400;500;600;700;800&family=Playball&family=Playfair+Display:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
     
     <style>
         /* ΓΕΝΙΚΑ ΣΤΥΛ & ΚΑΘΑΡΗ ΓΡΑΜΜΑΤΟΣΕΙΡΑ */
@@ -45,6 +45,70 @@
             max-height: calc(100vh - 40px); 
             overflow-y: auto; 
             overscroll-behavior: contain;
+            position: relative;
+        }
+
+        .language-switch {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            display: inline-flex;
+            gap: 5px;
+            padding: 4px;
+            border: 1px solid #e2e8f0;
+            border-radius: 999px;
+            background: rgba(248, 250, 252, 0.92);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+            z-index: 20;
+        }
+
+        .lang-btn {
+            width: 34px;
+            height: 30px;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            cursor: pointer;
+            font-size: 17px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.18s ease, transform 0.18s ease;
+        }
+
+        .lang-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .lang-btn.active {
+            background: #0f172a;
+            box-shadow: 0 6px 12px rgba(15, 23, 42, 0.18);
+        }
+
+        body.lang-el {
+            font-family: 'Noto Sans Greek', 'Inter', sans-serif;
+        }
+
+        body.lang-el h1 {
+            font-family: 'GFS Didot', 'Noto Sans Greek', serif;
+            font-style: normal;
+            letter-spacing: 0;
+        }
+
+        body.lang-el .category-section-title {
+            font-family: 'GFS Didot', 'Noto Sans Greek', serif;
+            font-style: normal;
+            font-weight: 400;
+        }
+
+        body.lang-el .cat-btn,
+        body.lang-el .item-name,
+        body.lang-el .item-description,
+        body.lang-el .item-badge,
+        body.lang-el .modal-description,
+        body.lang-el .menu-footer {
+            font-family: 'Noto Sans Greek', 'Inter', sans-serif;
         }
         
         /* ΤΙΤΛΟΣ ΜΕΝΟΥ (Elegant Serif) */
@@ -88,37 +152,6 @@
             text-align: center;
         }
 
-        .language-toggle {
-            display: inline-flex;
-            gap: 4px;
-            padding: 4px;
-            margin: 0 auto 22px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 999px;
-        }
-
-        .language-toggle-wrap {
-            display: flex;
-            justify-content: center;
-        }
-
-        .language-toggle button {
-            border: none;
-            background: transparent;
-            color: #64748b;
-            border-radius: 999px;
-            padding: 7px 14px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .language-toggle button.active {
-            background: #0f172a;
-            color: #ffffff;
-        }
-        
         /* RESPONSIVE ΟΡΙΖΟΝΤΙΟ SCROLL ΣΤΙΣ ΚΑΤΗΓΟΡΙΕΣ */
         .categories { 
             display: flex; 
@@ -468,10 +501,21 @@
                 height: calc(100svh - 28px);
                 min-height: 0;
                 max-height: none;
-                padding: 22px 2px 18px;
+                padding: 46px 2px 18px;
                 border-radius: 16px;
                 overflow-y: auto;
                 overscroll-behavior: contain;
+            }
+
+            .language-switch {
+                top: 10px;
+                right: 10px;
+            }
+
+            .lang-btn {
+                width: 32px;
+                height: 28px;
+                font-size: 16px;
             }
 
             .menu-grid { 
@@ -525,10 +569,6 @@
                 font-size: 12px;
             }
 
-            .language-toggle {
-                margin-bottom: 14px;
-            }
-
             .modal-photo {
                 width: calc(100% - 20px);
                 height: 230px;
@@ -558,27 +598,25 @@
 <body>
 
     <div class="menu-wrapper">
-        <header>
-            <p class="menu-kicker">Bistro</p>
-            <h1>The Bistro Menu</h1>
-            <p class="subtitle">Fresh ingredients • Crafted daily</p>
-            <p class="menu-note">Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.</p>
-        </header>
-
-        <div class="language-toggle-wrap">
-            <div class="language-toggle" aria-label="Language">
-                <button type="button" class="active" data-language="en">EN</button>
-                <button type="button" data-language="el">GR</button>
-            </div>
+        <div class="language-switch" aria-label="Menu language">
+            <button class="lang-btn active" type="button" data-lang="en" aria-label="English menu">🇬🇧</button>
+            <button class="lang-btn" type="button" data-lang="el" aria-label="Greek menu">🇬🇷</button>
         </div>
+
+        <header>
+            <p class="menu-kicker" data-i18n="brand">Bistro</p>
+            <h1 data-i18n="title">The Bistro Menu</h1>
+            <p class="subtitle" data-i18n="subtitle">Fresh ingredients • Crafted daily</p>
+            <p class="menu-note" data-i18n="note">Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.</p>
+        </header>
 
         <nav class="categories" id="customer-nav-container"></nav>
 
         <main class="menu-grid" id="customer-menu-grid"></main>
 
         <footer class="menu-footer">
-            <strong>Thank you for visiting</strong>
-            Prices include VAT. Ask our staff for daily specials and allergen information.
+            <strong data-i18n="footerTitle">Thank you for visiting</strong>
+            <span data-i18n="footerText">Prices include VAT. Ask our staff for daily specials and allergen information.</span>
         </footer>
     </div>
 
@@ -604,43 +642,106 @@
         const itemModal = document.getElementById('customer-item-modal');
         const itemModalBody = document.getElementById('customer-modal-body');
         const itemModalClose = document.getElementById('customer-modal-close');
-        const badgeLabels = {
+        const translations = {
             en: {
-                popular: 'Popular',
-                vegan: 'Vegan',
-                vegetarian: 'Vegetarian',
-                spicy: 'Spicy'
-            },
-            el: {
-                popular: 'Δημοφιλές',
-                vegan: 'Vegan',
-                vegetarian: 'Vegetarian',
-                spicy: 'Πικάντικο'
-            }
-        };
-        const uiText = {
-            en: {
+                brand: 'Bistro',
+                title: 'The Bistro Menu',
+                subtitle: 'Fresh ingredients • Crafted daily',
+                note: 'Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.',
+                footerTitle: 'Thank you for visiting',
+                footerText: 'Prices include VAT. Ask our staff for daily specials and allergen information.',
                 all: 'All',
                 empty: 'Our kitchen is preparing updates. Check back shortly!',
                 emptyCategory: 'No items available in this category.',
+                noDescription: 'No description available.',
                 outOfStock: 'Out of stock',
-                noDescription: 'No description available.'
+                viewItem: 'View',
+                categories: {
+                    Starters: 'Starters',
+                    Salads: 'Salads',
+                    Mains: 'Mains',
+                    Desserts: 'Desserts',
+                    Drinks: 'Drinks',
+                    Cocktails: 'Cocktails'
+                },
+                badges: {
+                    popular: 'Popular',
+                    vegan: 'Vegan',
+                    vegetarian: 'Vegetarian',
+                    spicy: 'Spicy'
+                }
             },
             el: {
+                brand: 'Bistro',
+                title: 'Το Μενού του Bistro',
+                subtitle: 'Φρέσκα υλικά • Καθημερινή προετοιμασία',
+                note: 'Δείτε τα διαθέσιμα πιάτα μας. Ενημερώστε μας για αλλεργίες ή διατροφικές ανάγκες πριν την παραγγελία.',
+                footerTitle: 'Σας ευχαριστούμε για την επίσκεψη',
+                footerText: 'Οι τιμές περιλαμβάνουν ΦΠΑ. Ρωτήστε το προσωπικό μας για πιάτα ημέρας και πληροφορίες αλλεργιογόνων.',
                 all: 'Όλα',
-                empty: 'Η κουζίνα μας ετοιμάζει ενημερώσεις. Ελέγξτε ξανά σύντομα!',
+                empty: 'Η κουζίνα μας ετοιμάζει ενημερώσεις. Ελέγξτε ξανά σε λίγο!',
                 emptyCategory: 'Δεν υπάρχουν διαθέσιμα πιάτα σε αυτή την κατηγορία.',
-                outOfStock: 'Εξαντλήθηκε',
-                noDescription: 'Δεν υπάρχει διαθέσιμη περιγραφή.'
+                noDescription: 'Δεν υπάρχει διαθέσιμη περιγραφή.',
+                outOfStock: 'Μη διαθέσιμο',
+                viewItem: 'Προβολή',
+                categories: {
+                    Starters: 'Ορεκτικά',
+                    Salads: 'Σαλάτες',
+                    Mains: 'Κυρίως',
+                    Desserts: 'Γλυκά',
+                    Drinks: 'Ποτά',
+                    Cocktails: 'Κοκτέιλ'
+                },
+                badges: {
+                    popular: 'Δημοφιλές',
+                    vegan: 'Vegan',
+                    vegetarian: 'Χορτοφαγικό',
+                    spicy: 'Πικάντικο'
+                }
             }
         };
 
-        function getDishName(item) {
+        function t(key) {
+            return translations[currentLanguage][key] || translations.en[key] || key;
+        }
+
+        function categoryLabel(category) {
+            return translations[currentLanguage].categories[category] || category;
+        }
+
+        function badgeLabel(badge) {
+            return translations[currentLanguage].badges[badge] || translations.en.badges[badge] || badge;
+        }
+
+        function dishName(item) {
             return currentLanguage === 'el' && item.nameEl ? item.nameEl : item.name;
         }
 
-        function getDishDescription(item) {
+        function dishDescription(item) {
             return currentLanguage === 'el' && item.descriptionEl ? item.descriptionEl : item.description;
+        }
+
+        function escapeHTML(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function applyLanguage() {
+            document.documentElement.lang = currentLanguage === 'el' ? 'el' : 'en';
+            document.body.classList.toggle('lang-el', currentLanguage === 'el');
+            document.querySelectorAll('[data-i18n]').forEach((element) => {
+                element.textContent = t(element.dataset.i18n);
+            });
+            document.querySelectorAll('[data-lang]').forEach((button) => {
+                const isActive = button.dataset.lang === currentLanguage;
+                button.classList.toggle('active', isActive);
+                button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            });
+            displayCustomerMenu();
         }
 
         function displayCustomerMenu() {
@@ -654,20 +755,20 @@
             
             const allBtn = document.createElement('button');
             allBtn.className = `cat-btn ${customerFilter === 'All' ? 'active' : ''}`;
-            allBtn.textContent = uiText[currentLanguage].all;
+            allBtn.textContent = t('all');
             allBtn.onclick = () => filterCustomerMenu('All');
             navContainer.appendChild(allBtn);
 
             categoriesToDisplay.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = `cat-btn ${customerFilter === cat ? 'active' : ''}`;
-                btn.textContent = cat;
+                btn.textContent = categoryLabel(cat);
                 btn.onclick = () => filterCustomerMenu(cat);
                 navContainer.appendChild(btn);
             });
 
             if (sharedMenu.length === 0) {
-                grid.innerHTML = `<div class="no-items">${uiText[currentLanguage].empty}</div>`;
+                grid.innerHTML = `<div class="no-items">${t('empty')}</div>`;
                 return;
             }
 
@@ -677,7 +778,7 @@
                     if (catItems.length > 0) {
                         const titleDiv = document.createElement('div');
                         titleDiv.className = 'category-section-title';
-                        titleDiv.textContent = cat;
+                        titleDiv.textContent = categoryLabel(cat);
                         grid.appendChild(titleDiv);
 
                         catItems.forEach(item => appendItemToGrid(grid, item));
@@ -686,7 +787,7 @@
             } else {
                 const visibleItems = sharedMenu.filter(item => item.category === customerFilter);
                 if (visibleItems.length === 0) {
-                    grid.innerHTML = `<div class="no-items">${uiText[currentLanguage].emptyCategory}</div>`;
+                    grid.innerHTML = `<div class="no-items">${t('emptyCategory')}</div>`;
                     return;
                 }
                 visibleItems.forEach(item => appendItemToGrid(grid, item));
@@ -698,19 +799,21 @@
             itemDiv.className = 'menu-item';
             itemDiv.setAttribute('role', 'button');
             itemDiv.setAttribute('tabindex', '0');
-            itemDiv.setAttribute('aria-label', `View ${getDishName(item)}`);
+            const name = dishName(item);
+            const description = dishDescription(item);
+            itemDiv.setAttribute('aria-label', `${t('viewItem')} ${name}`);
             
-            const descriptionContent = getDishDescription(item) ? getDishDescription(item) : '&nbsp;';
+            const descriptionContent = description ? escapeHTML(description) : '&nbsp;';
             const imageHTML = item.imageUrl
-                ? `<img class="item-photo" src="${item.imageUrl}" alt="${getDishName(item)}" loading="lazy" onerror="this.style.display='none'">`
+                ? `<img class="item-photo" src="${escapeHTML(item.imageUrl)}" alt="${escapeHTML(name)}" loading="lazy" onerror="this.style.display='none'">`
                 : '';
             const badges = Array.isArray(item.badges) ? item.badges : [];
             const badgesHTML = badges.length > 0
-                ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${badge}">${badgeLabels[currentLanguage][badge] || badge}</span>`).join('')}</div>`
+                ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${badge}">${badgeLabel(badge)}</span>`).join('')}</div>`
                 : '';
             
             const priceHTML = item.hidden 
-                ? `<span style="color: #ef4444; font-size: 13px; font-weight: 500; letter-spacing: 0;">${uiText[currentLanguage].outOfStock}</span>`
+                ? `<span style="color: #ef4444; font-size: 13px; font-weight: 500; letter-spacing: 0;">${t('outOfStock')}</span>`
                 : `${parseFloat(item.price).toFixed(2)} €`;
 
             const nameStyle = item.hidden 
@@ -721,7 +824,7 @@
                 ${imageHTML}
                 <div class="item-content">
                     <div class="item-header" style="${item.hidden ? 'opacity: 0.6;' : ''}">
-                        <span class="item-name" style="${nameStyle}">${getDishName(item)}</span>
+                        <span class="item-name" style="${nameStyle}">${escapeHTML(name)}</span>
                         <span class="item-price">${priceHTML}</span>
                     </div>
                     <div class="item-description" style="${item.hidden ? 'opacity: 0.5;' : ''}">${descriptionContent}</div>
@@ -742,23 +845,25 @@
         function openItemModal(item) {
             const badges = Array.isArray(item.badges) ? item.badges : [];
             const badgesHTML = badges.length > 0
-                ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${badge}">${badgeLabels[currentLanguage][badge] || badge}</span>`).join('')}</div>`
+                ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${badge}">${badgeLabel(badge)}</span>`).join('')}</div>`
                 : '';
+            const name = dishName(item);
+            const description = dishDescription(item);
             const imageHTML = item.imageUrl
-                ? `<img class="modal-photo" src="${item.imageUrl}" alt="${getDishName(item)}">`
+                ? `<img class="modal-photo" src="${escapeHTML(item.imageUrl)}" alt="${escapeHTML(name)}">`
                 : '';
             const priceHTML = item.hidden
-                ? `<span style="color: #ef4444;">${uiText[currentLanguage].outOfStock}</span>`
+                ? `<span style="color: #ef4444;">${t('outOfStock')}</span>`
                 : `${parseFloat(item.price).toFixed(2)} €`;
 
             itemModalBody.innerHTML = `
                 ${imageHTML}
                 <div class="modal-content">
                     <div class="modal-title-row">
-                        <h2>${getDishName(item)}</h2>
+                        <h2>${escapeHTML(name)}</h2>
                         <span class="modal-price">${priceHTML}</span>
                     </div>
-                    <p class="modal-description">${getDishDescription(item) || uiText[currentLanguage].noDescription}</p>
+                    <p class="modal-description">${escapeHTML(description || t('noDescription'))}</p>
                     ${badgesHTML}
                 </div>
             `;
@@ -783,33 +888,14 @@
             displayCustomerMenu();
         }
 
-        function openGoogleTranslatedMenu() {
-            const pageUrl = window.location.href;
-            if (pageUrl.startsWith('file:')) {
-                alert('Google Translate works after the site is online. Push to GitHub Pages and press GR there.');
-                return;
-            }
-
-            const translatedUrl = `https://translate.google.com/translate?sl=auto&tl=el&u=${encodeURIComponent(pageUrl)}`;
-            window.location.href = translatedUrl;
-        }
-
-        document.querySelectorAll('[data-language]').forEach(button => {
+        document.querySelectorAll('[data-lang]').forEach((button) => {
             button.addEventListener('click', () => {
-                if (button.dataset.language === 'el') {
-                    openGoogleTranslatedMenu();
-                    return;
-                }
-
-                currentLanguage = button.dataset.language;
-                document.querySelectorAll('[data-language]').forEach(toggleButton => {
-                    toggleButton.classList.toggle('active', toggleButton === button);
-                });
-                displayCustomerMenu();
+                currentLanguage = button.dataset.lang;
+                applyLanguage();
             });
         });
 
-        displayCustomerMenu();
+        applyLanguage();
 
         onSnapshot(doc(db, 'settings', 'categories'), (snapshot) => {
             if (snapshot.exists() && Array.isArray(snapshot.data().order)) {
