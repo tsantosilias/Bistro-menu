@@ -3,13 +3,17 @@
 
 import {
     db,
+    auth,
     collection,
     addDoc,
     updateDoc,
     deleteDoc,
     doc,
     onSnapshot,
-    setDoc
+    setDoc,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
 } from "./firebase.js";
 
 
@@ -30,6 +34,12 @@ const menuTableBody = document.getElementById('menu-table-body');
 const searchBar = document.getElementById('search-bar');
 const filterTabsContainer = document.getElementById('filter-tabs-container'); 
 const emptyState = document.getElementById('empty-state');
+const adminLoginForm = document.getElementById('admin-login-form');
+const adminLoginUsername = document.getElementById('admin-login-username');
+const adminLoginPassword = document.getElementById('admin-login-password');
+const adminLoginError = document.getElementById('admin-login-error');
+const adminLogoutButton = document.getElementById('admin-logout-btn');
+const adminUserName = document.getElementById('admin-user-name');
 
 const statTotalItems = document.getElementById('stat-total-items');
 const statTopCategory = document.getElementById('stat-top-category');
@@ -67,6 +77,8 @@ let categoryOrder = DEFAULT_CATEGORIES;
 let currentFilter = 'All'; 
 let currentSearchQuery = ''; 
 let hasAttemptedLocalMenuMigration = false;
+let hasStartedAdminSession = false;
+let firebaseUnsubscribers = [];
 
 function getCheckedBadgeValues(inputs) {
     return Array.from(inputs)
@@ -78,6 +90,39 @@ function setCheckedBadgeValues(inputs, badges = []) {
     inputs.forEach(input => {
         input.checked = badges.includes(input.value);
     });
+}
+
+function setLoginError(message = '') {
+    if (adminLoginError) adminLoginError.textContent = message;
+}
+
+function readableAuthError(error) {
+    const code = error && error.code ? error.code : '';
+    if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) {
+        return 'The username or password is not correct.';
+    }
+    if (code.includes('too-many-requests')) {
+        return 'Too many attempts. Please wait a bit and try again.';
+    }
+    if (code.includes('network-request-failed')) {
+        return 'Network problem. Check your connection and try again.';
+    }
+    return 'Could not sign in. Check that Email/Password auth is enabled in Firebase.';
+}
+
+function clearFirebaseSubscriptions() {
+    firebaseUnsubscribers.forEach((unsubscribe) => unsubscribe());
+    firebaseUnsubscribers = [];
+}
+
+function usernameToAuthEmail(username) {
+    const cleanUsername = username.trim().toLowerCase().replace(/\s+/g, '');
+    return cleanUsername.includes('@') ? cleanUsername : `${cleanUsername}@bistro.local`;
+}
+
+function authEmailToUsername(email) {
+    if (!email) return 'Admin';
+    return email.endsWith('@bistro.local') ? email.replace('@bistro.local', '') : email;
 }
 
 function renderAdminBadges(badges = []) {
@@ -414,7 +459,9 @@ editForm.addEventListener('submit', async (e) => {
 if (searchBar) searchBar.addEventListener('input', (e) => { currentSearchQuery = e.target.value; renderDashboard(); });
 
 function subscribeToFirebase() {
-    onSnapshot(categoriesDocRef, async (snapshot) => {
+    clearFirebaseSubscriptions();
+
+    const unsubscribeCategories = onSnapshot(categoriesDocRef, async (snapshot) => {
         if (snapshot.exists() && Array.isArray(snapshot.data().order)) {
             categoryOrder = snapshot.data().order;
         } else {
@@ -428,7 +475,7 @@ function subscribeToFirebase() {
         renderDashboard();
     }, (error) => console.error('Category listener error:', error));
 
-    onSnapshot(menuItemsRef, async (snapshot) => {
+    const unsubscribeMenuItems = onSnapshot(menuItemsRef, async (snapshot) => {
         if (!hasAttemptedLocalMenuMigration && snapshot.empty) {
             hasAttemptedLocalMenuMigration = true;
             const savedMenu = JSON.parse(localStorage.getItem('productionMenu') || '[]');
@@ -445,10 +492,67 @@ function subscribeToFirebase() {
         }));
         renderDashboard();
     }, (error) => console.error('Menu listener error:', error));
+
+    firebaseUnsubscribers.push(unsubscribeCategories, unsubscribeMenuItems);
 }
 
-renderDashboard();
-subscribeToFirebase();
+if (adminLoginForm) {
+    adminLoginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        setLoginError('');
+
+        const submitButton = adminLoginForm.querySelector('button[type="submit"]');
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Signing in...';
+        }
+
+        try {
+            await signInWithEmailAndPassword(
+                auth,
+                usernameToAuthEmail(adminLoginUsername.value),
+                adminLoginPassword.value
+            );
+            adminLoginPassword.value = '';
+        } catch (error) {
+            console.error('Admin sign in failed:', error);
+            setLoginError(readableAuthError(error));
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Sign In';
+            }
+        }
+    });
+}
+
+if (adminLogoutButton) {
+    adminLogoutButton.addEventListener('click', async () => {
+        await signOut(auth);
+    });
+}
+
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        document.body.classList.remove('admin-authenticated');
+        if (adminUserName) adminUserName.textContent = '';
+        clearFirebaseSubscriptions();
+        hasStartedAdminSession = false;
+        menuItems = [];
+        renderDashboard();
+        return;
+    }
+
+    document.body.classList.add('admin-authenticated');
+    setLoginError('');
+    if (adminUserName) adminUserName.textContent = authEmailToUsername(user.email);
+
+    if (!hasStartedAdminSession) {
+        hasStartedAdminSession = true;
+        renderDashboard();
+        subscribeToFirebase();
+    }
+});
 
 // ============================================================================
 // PREMIUM QR CODE INITIALIZATION & ENGINE FUNCTIONS (Πλήρως Διορθωμένο)

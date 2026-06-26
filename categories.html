@@ -30,6 +30,10 @@
             padding: 20px;
         }
 
+        body.auth-checking .category-container {
+            display: none;
+        }
+
         /* PREMIUM CONTAINER */
         .category-container {
             width: 100%;
@@ -176,7 +180,7 @@
         }
     </style>
 </head>
-<body>
+<body class="auth-checking">
 
     <div class="category-container">
         <a href="index.html" class="btn-back">← Back to Control Panel</a>
@@ -201,9 +205,11 @@
     <script type="module">
         import {
             db,
+            auth,
             doc,
             onSnapshot,
-            setDoc
+            setDoc,
+            onAuthStateChanged
         } from "./firebase.js";
 
         const DEFAULT_CATEGORIES = ['Mains', 'Drinks', 'Desserts'];
@@ -265,17 +271,34 @@
             renderCategoriesPage();
         });
 
-        renderCategoriesPage();
+        let hasStartedCategoryManager = false;
 
-        onSnapshot(categoriesDocRef, async (snapshot) => {
-            if (snapshot.exists() && Array.isArray(snapshot.data().order)) {
-                categoryOrder = snapshot.data().order;
-            } else {
-                categoryOrder = DEFAULT_CATEGORIES;
-                await setDoc(categoriesDocRef, { order: DEFAULT_CATEGORIES });
-            }
+        function startCategoryManager() {
+            if (hasStartedCategoryManager) return;
+            hasStartedCategoryManager = true;
+
             renderCategoriesPage();
-        }, (error) => console.error('Category listener error:', error));
+
+            onSnapshot(categoriesDocRef, async (snapshot) => {
+                if (snapshot.exists() && Array.isArray(snapshot.data().order)) {
+                    categoryOrder = snapshot.data().order;
+                } else {
+                    categoryOrder = DEFAULT_CATEGORIES;
+                    await setDoc(categoriesDocRef, { order: DEFAULT_CATEGORIES });
+                }
+                renderCategoriesPage();
+            }, (error) => console.error('Category listener error:', error));
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.body.classList.remove('auth-checking');
+            startCategoryManager();
+        });
     </script>
 </body>
 </html>

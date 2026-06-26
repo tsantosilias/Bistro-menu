@@ -12,6 +12,13 @@ import {
     setDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
 const firebaseConfig = {
     apiKey: "AIzaSyA9ZFz6YvXnYol9oG0aaIcQHpLkJp9mZXQ",
     authDomain: "bistro-menu-9345e.firebaseapp.com",
@@ -25,8 +32,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-export { db };
+export { db, auth };
 
 export {
     collection,
@@ -36,5 +44,8 @@ export {
     deleteDoc,
     doc,
     onSnapshot,
-    setDoc
+    setDoc,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
 };

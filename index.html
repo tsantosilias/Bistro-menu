@@ -31,6 +31,98 @@
             overflow: hidden;
         }
 
+        body:not(.admin-authenticated) .dashboard-wrapper,
+        body:not(.admin-authenticated) #sidebar-overlay,
+        body:not(.admin-authenticated) #edit-modal {
+            display: none !important;
+        }
+
+        body.admin-authenticated #admin-login-screen {
+            display: none !important;
+        }
+
+        .auth-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: #f8fafc;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+            padding: 30px;
+        }
+
+        .auth-card h1 {
+            font-size: 24px;
+            color: #0f172a;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-card p {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .auth-card .input-box label {
+            color: #475569;
+        }
+
+        .auth-card .input-box input {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        .auth-error {
+            min-height: 18px;
+            margin: 0 0 14px;
+            color: #dc2626;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .admin-session {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .admin-user-name {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-logout {
+            background: #ffffff;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+            padding: 9px 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: border 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-logout:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
         .dashboard-wrapper {
             display: grid;
             grid-template-columns: 280px 1fr;
@@ -539,6 +631,23 @@
 </head>
 <body>
 
+    <section class="auth-screen" id="admin-login-screen">
+        <form class="auth-card" id="admin-login-form">
+            <h1>Bistro Admin Login</h1>
+            <p>Sign in with the restaurant admin account to manage dishes, photos, prices, and categories.</p>
+            <div class="input-box">
+                <label>Username</label>
+                <input type="text" id="admin-login-username" autocomplete="username" placeholder="bistroadmin" required>
+            </div>
+            <div class="input-box">
+                <label>Password</label>
+                <input type="password" id="admin-login-password" autocomplete="current-password" placeholder="Password" required>
+            </div>
+            <div class="auth-error" id="admin-login-error"></div>
+            <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+    </section>
+
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
     <div class="dashboard-wrapper">
@@ -606,7 +715,11 @@
                     <button class="admin-burger-btn" id="open-sidebar-trigger">☰ Add New Dish</button>
                     <h1>Bistro Control Panel</h1>
                 </div>
-                <input type="text" id="search-bar" placeholder="🔍 Search dishes...">
+                <div class="admin-session">
+                    <input type="text" id="search-bar" placeholder="Search dishes...">
+                    <span class="admin-user-name" id="admin-user-name"></span>
+                    <button type="button" class="btn-logout" id="admin-logout-btn">Logout</button>
+                </div>
             </header>
 
             <!-- ΑΝΑΛΥΤΙΚΑ ΣΤΑΤΙΣΤΙΚΑ & ΡΥΘΜΙΣΤΗΣ -->
