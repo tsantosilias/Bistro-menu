@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playball&family=Playfair+Display:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
     
     <style>
         /* ΓΕΝΙΚΑ ΣΤΥΛ & ΚΑΘΑΡΗ ΓΡΑΜΜΑΤΟΣΕΙΡΑ */
@@ -170,14 +170,35 @@
         /* EDIT HERE: Premium Italic Τίτλοι Κατηγοριών με τη σωστή γραμματοσειρά */
         .category-section-title {
             grid-column: 1 / -1; 
-            font-family: 'Playfair Display', serif;
+            font-family: 'Playball', cursive;
             font-size: clamp(34px, 9vw, 46px); 
-            font-style: italic; 
+            font-style: normal; 
             font-weight: 400; 
             color: #0f172a;
             text-align: center;
             margin-top: 42px;
             margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            line-height: 1;
+        }
+
+        .category-section-title::before,
+        .category-section-title::after {
+            content: "";
+            width: clamp(72px, 23vw, 116px);
+            height: 36px;
+            background-image: url("data:image/svg+xml,%3Csvg width='140' height='44' viewBox='0 0 140 44' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M137 22C116 5 92 4 70 22C47 40 25 40 13 30C1 20 7 3 24 5C41 7 42 27 28 27C16 27 17 12 30 9' stroke='%23111827' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M76 19C65 8 51 7 43 17C36 26 44 36 54 31C63 26 57 15 47 18' stroke='%23111827' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            flex: 0 1 auto;
+        }
+
+        .category-section-title::after {
+            transform: scaleX(-1);
         }
         
         /* ΠΛΕΓΜΑ ΜΕΝΟΥ (2 Στήλες) */
@@ -200,7 +221,18 @@
             border-radius: 0;
             box-shadow: none;
             cursor: pointer;
+            position: relative;
             transition: background 0.18s ease;
+        }
+
+        .menu-item::after {
+            content: "";
+            position: absolute;
+            left: 3%;
+            right: 3%;
+            bottom: 0;
+            height: 1px;
+            background: rgba(15, 23, 42, 0.18);
         }
 
         .menu-item:hover {
@@ -301,7 +333,6 @@
             display: block;
             padding: 0 0 18px;
             border: none;
-            border-bottom: 1px solid #eef2f7;
             border-radius: 0;
             box-shadow: none;
             background: transparent;
