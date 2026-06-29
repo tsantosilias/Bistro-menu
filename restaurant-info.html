@@ -302,10 +302,6 @@
                 <h2>Menu Content</h2>
                 <div class="form-grid">
                     <div class="input-box">
-                        <label>Menu Title</label>
-                        <input type="text" id="setting-menu-title" placeholder="The Bistro Menu">
-                    </div>
-                    <div class="input-box">
                         <label>Subtitle</label>
                         <input type="text" id="setting-menu-subtitle" placeholder="Fresh ingredients - Crafted daily">
                     </div>
@@ -345,7 +341,6 @@
             instagram: '',
             wifiName: '',
             wifiPassword: '',
-            title: 'The Bistro Menu',
             subtitle: 'Fresh ingredients • Crafted daily',
             note: 'Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.',
             footerText: 'Prices include VAT. Ask our staff for daily specials and allergen information.'
@@ -367,7 +362,6 @@
             instagram: document.getElementById('setting-instagram'),
             wifiName: document.getElementById('setting-wifi-name'),
             wifiPassword: document.getElementById('setting-wifi-password'),
-            title: document.getElementById('setting-menu-title'),
             subtitle: document.getElementById('setting-menu-subtitle'),
             note: document.getElementById('setting-menu-note'),
             footerText: document.getElementById('setting-footer-text')
@@ -433,7 +427,6 @@
                     instagram: fields.instagram.value.trim(),
                     wifiName: fields.wifiName.value.trim(),
                     wifiPassword: fields.wifiPassword.value.trim(),
-                    title: fields.title.value.trim() || DEFAULT_RESTAURANT_SETTINGS.title,
                     subtitle: fields.subtitle.value.trim() || DEFAULT_RESTAURANT_SETTINGS.subtitle,
                     note: fields.note.value.trim() || DEFAULT_RESTAURANT_SETTINGS.note,
                     footerText: fields.footerText.value.trim() || DEFAULT_RESTAURANT_SETTINGS.footerText

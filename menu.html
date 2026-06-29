@@ -963,7 +963,7 @@
         }
 
         function applyRestaurantSettings() {
-            const title = restaurantSettings.title || restaurantSettings.restaurantName || t('title');
+            const title = restaurantSettings.restaurantName || restaurantSettings.title || t('title');
             const subtitle = restaurantSettings.subtitle || t('subtitle');
             const note = restaurantSettings.note || t('note');
             const contactParts = [
