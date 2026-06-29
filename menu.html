@@ -171,14 +171,16 @@
             text-align: center;
         }
 
-        .menu-kicker {
-            font-size: 11px;
-            color: #64748b;
-            font-weight: 700;
-            letter-spacing: 1.8px;
-            text-transform: uppercase;
-            text-align: center;
-            margin-bottom: 5px;
+        .restaurant-logo {
+            display: none;
+            width: clamp(58px, 18vw, 86px);
+            max-height: 86px;
+            object-fit: contain;
+            margin: 0 auto 10px;
+        }
+
+        .restaurant-logo.visible {
+            display: block;
         }
         
         .subtitle { 
@@ -739,7 +741,7 @@
         </div>
 
         <header>
-            <p class="menu-kicker" data-i18n="brand">Bistro</p>
+            <img class="restaurant-logo" id="restaurant-logo" alt="Restaurant logo">
             <h1 data-i18n="title">The Bistro Menu</h1>
             <p class="subtitle" data-i18n="subtitle">Fresh ingredients • Crafted daily</p>
             <p class="menu-note" data-i18n="note">Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.</p>
@@ -961,7 +963,7 @@
         }
 
         function applyRestaurantSettings() {
-            const title = restaurantSettings.title || t('title');
+            const title = restaurantSettings.title || restaurantSettings.restaurantName || t('title');
             const subtitle = restaurantSettings.subtitle || t('subtitle');
             const note = restaurantSettings.note || t('note');
             const contactParts = [
@@ -973,16 +975,19 @@
                 .filter(Boolean)
                 .join(' ');
 
-            const brandEl = document.querySelector('[data-i18n="brand"]');
             const titleEl = document.querySelector('[data-i18n="title"]');
             const subtitleEl = document.querySelector('[data-i18n="subtitle"]');
             const noteEl = document.querySelector('[data-i18n="note"]');
             const footerTextEl = document.querySelector('[data-i18n="footerText"]');
+            const logoEl = document.getElementById('restaurant-logo');
             const wifiInfoEl = document.getElementById('wifi-info');
             const wifiNameEl = document.getElementById('wifi-name');
             const wifiPasswordEl = document.getElementById('wifi-password');
 
-            if (brandEl) brandEl.textContent = restaurantSettings.restaurantName || t('brand');
+            if (logoEl) {
+                logoEl.src = restaurantSettings.logoUrl || '';
+                logoEl.classList.toggle('visible', Boolean(restaurantSettings.logoUrl));
+            }
             if (titleEl) titleEl.textContent = title;
             if (subtitleEl) subtitleEl.textContent = subtitle;
             if (noteEl) noteEl.textContent = note;
