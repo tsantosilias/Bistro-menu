@@ -41,15 +41,25 @@ const adminLoginError = document.getElementById('admin-login-error');
 const adminLogoutButton = document.getElementById('admin-logout-btn');
 const adminUserName = document.getElementById('admin-user-name');
 const restaurantSettingsForm = document.getElementById('restaurant-settings-form');
+const settingRestaurantName = document.getElementById('setting-restaurant-name');
+const settingLogoUrl = document.getElementById('setting-logo-url');
+const settingPhone = document.getElementById('setting-phone');
+const settingAddress = document.getElementById('setting-address');
+const settingInstagram = document.getElementById('setting-instagram');
+const settingPrimaryColor = document.getElementById('setting-primary-color');
+const settingSecondaryColor = document.getElementById('setting-secondary-color');
+const settingCurrency = document.getElementById('setting-currency');
+const settingLanguages = document.getElementById('setting-languages');
 const settingMenuTitle = document.getElementById('setting-menu-title');
 const settingMenuSubtitle = document.getElementById('setting-menu-subtitle');
 const settingMenuNote = document.getElementById('setting-menu-note');
 const settingFooterText = document.getElementById('setting-footer-text');
-const settingContactLine = document.getElementById('setting-contact-line');
 const restaurantSettingsStatus = document.getElementById('restaurant-settings-status');
 
 const statTotalItems = document.getElementById('stat-total-items');
-const statTopCategory = document.getElementById('stat-top-category');
+const statAvailableItems = document.getElementById('stat-available-items');
+const statOutOfStockItems = document.getElementById('stat-out-of-stock-items');
+const statTotalCategories = document.getElementById('stat-total-categories');
 
 // Selectors για τη λειτουργία του Responsive Burger Menu
 const adminSidebar = document.getElementById('admin-sidebar');
@@ -88,12 +98,21 @@ let hasAttemptedLocalMenuMigration = false;
 let hasStartedAdminSession = false;
 let firebaseUnsubscribers = [];
 const DEFAULT_RESTAURANT_SETTINGS = {
+    restaurantName: 'Bistro',
+    logoUrl: '',
+    phone: '',
+    address: '',
+    instagram: '',
+    primaryColor: '#0f172a',
+    secondaryColor: '#f8fafc',
+    currency: '€',
+    languages: 'en,el',
     title: 'The Bistro Menu',
     subtitle: 'Fresh ingredients • Crafted daily',
     note: 'Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.',
-    footerText: 'Prices include VAT. Ask our staff for daily specials and allergen information.',
-    contactLine: ''
+    footerText: 'Prices include VAT. Ask our staff for daily specials and allergen information.'
 };
+let restaurantSettingsState = { ...DEFAULT_RESTAURANT_SETTINGS };
 
 function getCheckedBadgeValues(inputs) {
     return Array.from(inputs)
@@ -142,11 +161,20 @@ function authEmailToUsername(email) {
 
 function fillRestaurantSettingsForm(settings = {}) {
     const data = { ...DEFAULT_RESTAURANT_SETTINGS, ...settings };
+    restaurantSettingsState = data;
+    if (settingRestaurantName) settingRestaurantName.value = data.restaurantName || '';
+    if (settingLogoUrl) settingLogoUrl.value = data.logoUrl || '';
+    if (settingPhone) settingPhone.value = data.phone || '';
+    if (settingAddress) settingAddress.value = data.address || '';
+    if (settingInstagram) settingInstagram.value = data.instagram || '';
+    if (settingPrimaryColor) settingPrimaryColor.value = data.primaryColor || DEFAULT_RESTAURANT_SETTINGS.primaryColor;
+    if (settingSecondaryColor) settingSecondaryColor.value = data.secondaryColor || DEFAULT_RESTAURANT_SETTINGS.secondaryColor;
+    if (settingCurrency) settingCurrency.value = data.currency || DEFAULT_RESTAURANT_SETTINGS.currency;
+    if (settingLanguages) settingLanguages.value = data.languages || DEFAULT_RESTAURANT_SETTINGS.languages;
     if (settingMenuTitle) settingMenuTitle.value = data.title || '';
     if (settingMenuSubtitle) settingMenuSubtitle.value = data.subtitle || '';
     if (settingMenuNote) settingMenuNote.value = data.note || '';
     if (settingFooterText) settingFooterText.value = data.footerText || '';
-    if (settingContactLine) settingContactLine.value = data.contactLine || '';
 }
 
 function setRestaurantSettingsStatus(message = '', isError = false) {
@@ -178,6 +206,10 @@ function safeClassName(value) {
 function formatPrice(value) {
     const price = Number.parseFloat(value);
     return Number.isFinite(price) ? price.toFixed(2) : '0.00';
+}
+
+function currencySymbol() {
+    return restaurantSettingsState.currency || DEFAULT_RESTAURANT_SETTINGS.currency;
 }
 
 async function uploadDishImage(file) {
@@ -287,22 +319,34 @@ function renderDashboard() {
             row.style.backgroundColor = "rgba(239, 68, 68, 0.05)";
         }
 
-        const hideIcon = item.hidden ? 'Unstock' : 'Stocked';
+        const availabilityLabel = item.hidden ? 'Out of Stock' : 'Available';
+        const availabilityActionLabel = item.hidden ? 'Mark Available' : 'Mark Out of Stock';
+        const availabilityClass = item.hidden ? 'out' : 'available';
         const categoryClass = safeClassName(item.category);
+        const thumbnailHTML = item.imageUrl
+            ? `<img class="dish-thumb" src="${escapeHTML(item.imageUrl)}" alt="${escapeHTML(item.name)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'dish-thumb dish-thumb-placeholder',textContent:'IMG'}))">`
+            : `<span class="dish-thumb dish-thumb-placeholder">IMG</span>`;
 
         row.innerHTML = `
             <td>
-                <strong>${escapeHTML(item.name)}</strong> ${item.hidden ? '<span style="color: #ef4444; font-size: 11px; margin-left: 5px; font-weight: bold;">[OUT OF STOCK]</span>' : ''}
-                <div style="font-size: 13px; color: #64748b; font-weight: normal; margin-top: 4px;">${item.description ? escapeHTML(item.description) : '<i>No description added.</i>'}</div>
-                ${item.imageUrl ? '<div style="font-size: 11px; color: #64748b; margin-top: 5px; font-weight: 600;">Photo added</div>' : ''}
-                ${renderAdminBadges(item.badges)}
+                <div class="dish-cell">
+                    ${thumbnailHTML}
+                    <div class="dish-main">
+                        <div class="dish-title-line">
+                            <strong>${escapeHTML(item.name)}</strong>
+                            <span class="status-pill ${availabilityClass}">${availabilityLabel}</span>
+                        </div>
+                        <div style="font-size: 13px; color: #64748b; font-weight: normal; margin-top: 4px;">${item.description ? escapeHTML(item.description) : '<i>No description added.</i>'}</div>
+                        ${renderAdminBadges(item.badges)}
+                    </div>
+                </div>
             </td>
             <td><span class="badge ${categoryClass}">${escapeHTML(item.category)}</span></td>
-            <td><strong>${formatPrice(item.price)} €</strong></td>
+            <td><strong>${formatPrice(item.price)} ${escapeHTML(currencySymbol())}</strong></td>
             <td style="text-align: right;">
                 <div class="action-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                     <span class="drag-handle" style="margin-right: 10px;">☰</span>
-                    <button class="btn-row-edit" style="background: ${item.hidden ? '#64748b' : '#2a4a58'}; color: white;" data-action="toggle-stock" data-id="${item.id}">${hideIcon}</button>
+                    <button class="btn-row-edit" style="background: ${item.hidden ? '#64748b' : '#2a4a58'}; color: white;" data-action="toggle-stock" data-id="${item.id}">${availabilityActionLabel}</button>
                     <button class="btn-row-edit" data-action="edit" data-id="${item.id}">Edit</button>
                     <button class="btn-row-del" data-action="delete" data-id="${item.id}">Delete</button>
                 </div>
@@ -373,14 +417,11 @@ function handleTabClick(buttonElement, category) {
 
 function calculateCalculatedStats() {
     if (statTotalItems) statTotalItems.textContent = menuItems.length;
-    const counts = {};
-    categoryOrder.forEach(c => counts[c] = 0);
-    menuItems.forEach(item => { if(counts[item.category] !== undefined) counts[item.category]++; });
-    let maxCat = 'None'; let maxVal = 0;
-    for (const [cat, val] of Object.entries(counts)) {
-        if (val > maxVal) { maxVal = val; maxCat = cat; }
-    }
-    if (statTopCategory) statTopCategory.textContent = maxCat !== 'None' ? `${maxCat} (${maxVal})` : 'None';
+    const availableItems = menuItems.filter(item => !item.hidden).length;
+    const outOfStockItems = menuItems.filter(item => item.hidden).length;
+    if (statAvailableItems) statAvailableItems.textContent = availableItems;
+    if (statOutOfStockItems) statOutOfStockItems.textContent = outOfStockItems;
+    if (statTotalCategories) statTotalCategories.textContent = categoryOrder.length;
 }
 
 // ============================================================================
@@ -524,11 +565,19 @@ if (restaurantSettingsForm) {
 
         try {
             await setDoc(restaurantDocRef, {
+                restaurantName: settingRestaurantName.value.trim() || DEFAULT_RESTAURANT_SETTINGS.restaurantName,
+                logoUrl: settingLogoUrl.value.trim(),
+                phone: settingPhone.value.trim(),
+                address: settingAddress.value.trim(),
+                instagram: settingInstagram.value.trim(),
+                primaryColor: settingPrimaryColor.value || DEFAULT_RESTAURANT_SETTINGS.primaryColor,
+                secondaryColor: settingSecondaryColor.value || DEFAULT_RESTAURANT_SETTINGS.secondaryColor,
+                currency: settingCurrency.value || DEFAULT_RESTAURANT_SETTINGS.currency,
+                languages: settingLanguages.value || DEFAULT_RESTAURANT_SETTINGS.languages,
                 title: settingMenuTitle.value.trim() || DEFAULT_RESTAURANT_SETTINGS.title,
                 subtitle: settingMenuSubtitle.value.trim() || DEFAULT_RESTAURANT_SETTINGS.subtitle,
                 note: settingMenuNote.value.trim() || DEFAULT_RESTAURANT_SETTINGS.note,
-                footerText: settingFooterText.value.trim() || DEFAULT_RESTAURANT_SETTINGS.footerText,
-                contactLine: settingContactLine.value.trim()
+                footerText: settingFooterText.value.trim() || DEFAULT_RESTAURANT_SETTINGS.footerText
             }, { merge: true });
             setRestaurantSettingsStatus('Saved.');
             setTimeout(() => setRestaurantSettingsStatus(''), 2200);
@@ -538,7 +587,7 @@ if (restaurantSettingsForm) {
         } finally {
             if (submitButton) {
                 submitButton.disabled = false;
-                submitButton.textContent = 'Save Info';
+                submitButton.textContent = 'Save Settings';
             }
         }
     });

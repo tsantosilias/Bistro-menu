@@ -742,6 +742,15 @@
         let hasLoadedMenuItems = false;
         let hasLoadError = false;
         let restaurantSettings = {
+            restaurantName: 'Bistro',
+            logoUrl: '',
+            phone: '',
+            address: '',
+            instagram: '',
+            primaryColor: '#0f172a',
+            secondaryColor: '#f8fafc',
+            currency: '€',
+            languages: 'en,el',
             title: 'The Bistro Menu',
             subtitle: 'Fresh ingredients • Crafted daily',
             note: 'Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.',
@@ -872,15 +881,38 @@
             return Number.isFinite(price) ? price.toFixed(2) : '0.00';
         }
 
+        function currencySymbol() {
+            return restaurantSettings.currency || '€';
+        }
+
+        function enabledLanguages() {
+            const rawLanguages = restaurantSettings.languages || 'en,el';
+            const languages = String(rawLanguages)
+                .split(',')
+                .map(language => language.trim())
+                .filter(language => translations[language]);
+            return languages.length > 0 ? languages : ['en'];
+        }
+
         function applyLanguage() {
+            const activeLanguages = enabledLanguages();
+            if (!activeLanguages.includes(currentLanguage)) {
+                currentLanguage = activeLanguages[0];
+            }
             document.documentElement.lang = currentLanguage === 'el' ? 'el' : 'en';
             document.body.classList.toggle('lang-el', currentLanguage === 'el');
             document.querySelectorAll('[data-i18n]').forEach((element) => {
                 element.textContent = t(element.dataset.i18n);
             });
             applyRestaurantSettings();
+            const languageSwitch = document.querySelector('.language-switch');
+            if (languageSwitch) {
+                languageSwitch.hidden = activeLanguages.length <= 1;
+            }
             document.querySelectorAll('[data-lang]').forEach((button) => {
+                const isAllowed = activeLanguages.includes(button.dataset.lang);
                 const isActive = button.dataset.lang === currentLanguage;
+                button.hidden = !isAllowed;
                 button.classList.toggle('active', isActive);
                 button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
             });
@@ -891,15 +923,22 @@
             const title = restaurantSettings.title || t('title');
             const subtitle = restaurantSettings.subtitle || t('subtitle');
             const note = restaurantSettings.note || t('note');
-            const footerText = [restaurantSettings.footerText || t('footerText'), restaurantSettings.contactLine]
+            const contactParts = [
+                restaurantSettings.address,
+                restaurantSettings.phone,
+                restaurantSettings.instagram
+            ].filter(Boolean);
+            const footerText = [restaurantSettings.footerText || t('footerText'), ...contactParts]
                 .filter(Boolean)
                 .join(' ');
 
+            const brandEl = document.querySelector('[data-i18n="brand"]');
             const titleEl = document.querySelector('[data-i18n="title"]');
             const subtitleEl = document.querySelector('[data-i18n="subtitle"]');
             const noteEl = document.querySelector('[data-i18n="note"]');
             const footerTextEl = document.querySelector('[data-i18n="footerText"]');
 
+            if (brandEl) brandEl.textContent = restaurantSettings.restaurantName || t('brand');
             if (titleEl) titleEl.textContent = title;
             if (subtitleEl) subtitleEl.textContent = subtitle;
             if (noteEl) noteEl.textContent = note;
@@ -986,7 +1025,7 @@
             
             const priceHTML = item.hidden 
                 ? `<span style="color: #ef4444; font-size: 13px; font-weight: 500; letter-spacing: 0;">${t('outOfStock')}</span>`
-                : `${formatPrice(item.price)} €`;
+                : `${formatPrice(item.price)} ${escapeHTML(currencySymbol())}`;
 
             const nameStyle = item.hidden 
                 ? `color: #94a3b8; font-weight: 500; font-style: italic;` 
@@ -1026,7 +1065,7 @@
                 : '';
             const priceHTML = item.hidden
                 ? `<span style="color: #ef4444;">${t('outOfStock')}</span>`
-                : `${formatPrice(item.price)} €`;
+                : `${formatPrice(item.price)} ${escapeHTML(currencySymbol())}`;
 
             itemModalBody.innerHTML = `
                 ${imageHTML}
@@ -1103,7 +1142,7 @@
                     ...restaurantSettings,
                     ...snapshot.data()
                 };
-                applyRestaurantSettings();
+                applyLanguage();
             }
         }, (error) => {
             console.error('Restaurant settings listener error:', error);

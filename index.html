@@ -22,7 +22,7 @@
         }
 
         body {
-            background-color: #f8fafc;
+            background-color: #f3f6fb;
             color: #0f172a;
             min-height: 100vh;
         }
@@ -128,7 +128,7 @@
 
         .dashboard-wrapper {
             display: grid;
-            grid-template-columns: 280px 1fr;
+            grid-template-columns: 320px 1fr;
             min-height: 100vh;
         }
 
@@ -136,12 +136,12 @@
            SLEEK SIDEBAR DESIGN
            ====================================================================== */
         .sidebar {
-            background-color: #0f172a;
+            background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
             color: #f8fafc;
-            padding: 30px 24px;
+            padding: 26px 24px;
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 22px;
             border-right: 1px solid #1e293b;
             position: sticky;
             top: 0;
@@ -201,13 +201,26 @@
             border-top: 1px solid #24344f;
         }
 
-        .restaurant-settings h3 {
+        .restaurant-settings h3,
+        .settings-section-title {
             font-size: 12px;
             font-weight: 800;
             text-transform: uppercase;
             color: #cbd5e1;
             letter-spacing: 0.7px;
             margin-bottom: 14px;
+        }
+
+        .settings-section-title {
+            margin-top: 20px;
+            margin-bottom: 12px;
+            color: #94a3b8;
+        }
+
+        .settings-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
         }
 
         .settings-status {
@@ -231,8 +244,8 @@
         .input-box {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-bottom: 16px;
+            gap: 7px;
+            margin-bottom: 14px;
         }
 
         .input-box label {
@@ -247,10 +260,10 @@
         .input-box select, 
         .input-box textarea {
             width: 100%;
-            padding: 10px 14px;
-            background: #1e293b;
+            padding: 11px 13px;
+            background: rgba(15, 23, 42, 0.72);
             border: 1px solid #334155;
-            border-radius: 8px;
+            border-radius: 10px;
             color: #ffffff;
             font-family: 'Inter', system-ui, sans-serif;
             font-size: 14px;
@@ -279,9 +292,9 @@
             align-items: center;
             gap: 7px;
             padding: 9px 10px;
-            background: #1e293b;
+            background: rgba(15, 23, 42, 0.72);
             border: 1px solid #334155;
-            border-radius: 8px;
+            border-radius: 10px;
             color: #e2e8f0;
             font-size: 12px;
             font-weight: 600;
@@ -308,11 +321,13 @@
         .btn-primary:hover { background: #475569; border-color: #64748b; }
 
         .sidebar .btn-primary {
-            background: #f8fafc;
+            background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
             color: #0f172a;
             border-color: #ffffff;
             font-weight: 800;
             letter-spacing: 0;
+            border-radius: 10px;
+            box-shadow: 0 12px 22px rgba(15, 23, 42, 0.22);
         }
 
         .sidebar .btn-primary:hover {
@@ -324,17 +339,23 @@
            MAIN CONTENT & DYNAMIC CARDS
            ====================================================================== */
         .main-content {
-            padding: 40px;
-            background-color: #f8fafc;
+            padding: 38px;
+            background-color: #f3f6fb;
         }
 
         .top-header h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 26px;
+            font-size: 28px;
             font-style: italic;
             font-weight: 600;
             color: #0f172a;
             letter-spacing: 0;
+        }
+
+        .top-header p {
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 5px;
         }
 
         #search-bar {
@@ -351,8 +372,8 @@
 
         .analytics-cards {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
             margin-top: 30px;
             margin-bottom: 35px;
         }
@@ -360,12 +381,13 @@
         .card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
             display: flex;
             flex-direction: column;
             justify-content: center;
+            min-height: 118px;
         }
 
         .card h3 {
@@ -375,6 +397,21 @@
             color: #64748b;
             letter-spacing: 0.5px;
             margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 30px;
+            font-weight: 850;
+            margin-top: 7px;
+            color: #0f172a;
+            letter-spacing: -0.8px;
+        }
+
+        .metric-note {
+            margin-top: 8px;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 600;
         }
 
         #qr-code-element {
@@ -458,8 +495,8 @@
         .table-container {
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            border-radius: 14px;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
             overflow: hidden;
         }
 
@@ -540,6 +577,66 @@
             padding: 18px;
             overflow-y: auto;
         }
+
+        .dish-cell {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .dish-thumb {
+            width: 58px;
+            height: 58px;
+            flex: 0 0 58px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+        }
+
+        .dish-thumb-placeholder {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .dish-main {
+            min-width: 0;
+        }
+
+        .dish-title-line {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.35px;
+        }
+
+        .status-pill.available {
+            color: #047857;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status-pill.out {
+            color: #b91c1c;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
         .modal-overlay.hidden { display: none; }
         
         .modal-box {
@@ -605,8 +702,10 @@
                 opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
             }
             .sidebar-overlay.visible { opacity: 1; pointer-events: auto; }
-            .analytics-cards { grid-template-columns: 1fr; gap: 15px; }
-            .analytics-cards .card:first-child { display: none; }
+            .analytics-cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+            }
             .main-content { padding: 15px 0; }
             .filter-tabs {
                 margin-left: -15px;
@@ -668,7 +767,7 @@
                 flex-wrap: wrap;
                 justify-content: flex-end !important;
                 gap: 6px !important;
-                max-width: 118px;
+                max-width: 140px;
             }
 
             .drag-handle {
@@ -679,6 +778,23 @@
             .btn-row-del {
                 padding: 6px 9px;
                 font-size: 11px;
+            }
+
+            .dish-cell {
+                gap: 10px;
+            }
+
+            .dish-thumb {
+                width: 52px;
+                height: 52px;
+                flex-basis: 52px;
+                border-radius: 10px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .analytics-cards {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -761,7 +877,42 @@
                 </div>
 
                 <form class="restaurant-settings" id="restaurant-settings-form">
-                    <h3>Restaurant Info</h3>
+                    <h3>Restaurant Settings</h3>
+                    <p class="settings-section-title">Brand</p>
+                    <div class="input-box">
+                        <label>Restaurant Name</label>
+                        <input type="text" id="setting-restaurant-name" placeholder="Bistro">
+                    </div>
+                    <div class="input-box">
+                        <label>Logo URL</label>
+                        <input type="url" id="setting-logo-url" placeholder="https://...">
+                    </div>
+                    <div class="settings-grid-2">
+                        <div class="input-box">
+                            <label>Primary Color</label>
+                            <input type="color" id="setting-primary-color" value="#0f172a">
+                        </div>
+                        <div class="input-box">
+                            <label>Secondary Color</label>
+                            <input type="color" id="setting-secondary-color" value="#f8fafc">
+                        </div>
+                    </div>
+
+                    <p class="settings-section-title">Contact</p>
+                    <div class="input-box">
+                        <label>Phone</label>
+                        <input type="text" id="setting-phone" placeholder="+30 210 000 0000">
+                    </div>
+                    <div class="input-box">
+                        <label>Address</label>
+                        <textarea id="setting-address" rows="2" placeholder="Restaurant street and city"></textarea>
+                    </div>
+                    <div class="input-box">
+                        <label>Instagram</label>
+                        <input type="text" id="setting-instagram" placeholder="@bistro">
+                    </div>
+
+                    <p class="settings-section-title">Menu Content</p>
                     <div class="input-box">
                         <label>Menu Title</label>
                         <input type="text" id="setting-menu-title" placeholder="The Bistro Menu">
@@ -778,11 +929,25 @@
                         <label>Footer Text</label>
                         <textarea id="setting-footer-text" rows="3" placeholder="Prices include VAT..."></textarea>
                     </div>
-                    <div class="input-box">
-                        <label>Contact Line</label>
-                        <input type="text" id="setting-contact-line" placeholder="Instagram: @bistro • Tel: 2100000000">
+                    <div class="settings-grid-2">
+                        <div class="input-box">
+                            <label>Currency</label>
+                            <select id="setting-currency">
+                                <option value="€">€ Euro</option>
+                                <option value="$">$ Dollar</option>
+                                <option value="£">£ Pound</option>
+                            </select>
+                        </div>
+                        <div class="input-box">
+                            <label>Languages</label>
+                            <select id="setting-languages">
+                                <option value="en">English</option>
+                                <option value="el">Greek</option>
+                                <option value="en,el">English + Greek</option>
+                            </select>
+                        </div>
                     </div>
-                    <button type="submit" class="btn-primary">Save Info</button>
+                    <button type="submit" class="btn-primary">Save Settings</button>
                     <div class="settings-status" id="restaurant-settings-status"></div>
                 </form>
             </div>
@@ -793,7 +958,8 @@
             <header class="top-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
                     <button class="admin-burger-btn" id="open-sidebar-trigger">☰ Add New Dish</button>
-                    <h1>Bistro Control Panel</h1>
+                    <h1>Restaurant Menu Manager</h1>
+                    <p>Manage dishes, availability, categories, branding, and QR menu settings.</p>
                 </div>
                 <div class="admin-session">
                     <input type="text" id="search-bar" placeholder="Search dishes...">
@@ -805,14 +971,24 @@
             <!-- ΑΝΑΛΥΤΙΚΑ ΣΤΑΤΙΣΤΙΚΑ & ΡΥΘΜΙΣΤΗΣ -->
             <section class="analytics-cards">
                 <div class="card">
-                    <h3>Total Dishes</h3>
-                    <p id="stat-total-items" style="font-size: 28px; font-weight: 700; margin-top: 6px; color: #0f172a;">0</p>
+                    <h3>Total Items</h3>
+                    <p class="metric-value" id="stat-total-items">0</p>
+                    <span class="metric-note">All menu entries</span>
                 </div>
-                
                 <div class="card">
-                    <h3>Top Category</h3>
-                    <p id="stat-top-category" style="font-size: 20px; font-weight: 600; margin-top: 4px; color: #334155;">None</p>
-                    <a href="categories.html" class="btn-manage-categories">📂 Manage Categories</a>
+                    <h3>Available Items</h3>
+                    <p class="metric-value" id="stat-available-items">0</p>
+                    <span class="metric-note">Visible to customers</span>
+                </div>
+                <div class="card">
+                    <h3>Out of Stock Items</h3>
+                    <p class="metric-value" id="stat-out-of-stock-items">0</p>
+                    <span class="metric-note">Hidden from ordering</span>
+                </div>
+                <div class="card">
+                    <h3>Total Categories</h3>
+                    <p class="metric-value" id="stat-total-categories">0</p>
+                    <a href="categories.html" class="btn-manage-categories">Manage Categories</a>
                 </div>
             </section>
 
