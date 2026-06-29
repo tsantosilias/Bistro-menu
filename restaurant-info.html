@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Info</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f3f6fb;
+            color: #0f172a;
+            padding: 26px;
+        }
+
+        body.auth-checking .settings-shell {
+            display: none;
+        }
+
+        .settings-shell {
+            width: 100%;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 22px;
+        }
+
+        .btn-back:hover {
+            color: #0f172a;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-end;
+            margin-bottom: 22px;
+        }
+
+        .settings-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(30px, 5vw, 42px);
+            font-style: italic;
+            font-weight: 600;
+            letter-spacing: 0;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .settings-header p {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 620px;
+        }
+
+        .settings-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+            padding: clamp(22px, 4vw, 34px);
+        }
+
+        .settings-section {
+            padding-bottom: 28px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .settings-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .settings-section h2 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #475569;
+            margin-bottom: 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .form-grid .span-2 {
+            grid-column: span 2;
+        }
+
+        .input-box {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .input-box label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.08em;
+        }
+
+        .input-box input,
+        .input-box select,
+        .input-box textarea {
+            width: 100%;
+            padding: 12px 13px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.45;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input-box textarea {
+            resize: vertical;
+            min-height: 92px;
+        }
+
+        .input-box input:focus,
+        .input-box select:focus,
+        .input-box textarea:focus {
+            border-color: #0f172a;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
+        }
+
+        .input-box input[type="color"] {
+            height: 46px;
+            padding: 6px;
+        }
+
+        .settings-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .settings-status {
+            min-height: 18px;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            margin-right: auto;
+        }
+
+        .btn-primary {
+            min-width: 160px;
+            background: #0f172a;
+            color: #ffffff;
+            border: 1px solid #0f172a;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: #1e293b;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+            transform: none;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                padding: 16px;
+            }
+
+            .settings-header {
+                display: block;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid .span-2 {
+                grid-column: span 1;
+            }
+
+            .settings-actions {
+                align-items: stretch;
+            }
+
+            .settings-status,
+            .btn-primary {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="auth-checking">
+    <main class="settings-shell">
+        <a href="index.html" class="btn-back">&larr; Back to Dashboard</a>
+
+        <header class="settings-header">
+            <div>
+                <h1>Restaurant Info</h1>
+                <p>Control the public menu branding, contact details, currency, language options, and customer-facing text.</p>
+            </div>
+        </header>
+
+        <form class="settings-card" id="restaurant-settings-form">
+            <section class="settings-section">
+                <h2>Brand</h2>
+                <div class="form-grid">
+                    <div class="input-box">
+                        <label>Restaurant Name</label>
+                        <input type="text" id="setting-restaurant-name" placeholder="Bistro">
+                    </div>
+                    <div class="input-box">
+                        <label>Logo URL</label>
+                        <input type="url" id="setting-logo-url" placeholder="https://...">
+                    </div>
+                    <div class="input-box">
+                        <label>Primary Color</label>
+                        <input type="color" id="setting-primary-color" value="#0f172a">
+                    </div>
+                    <div class="input-box">
+                        <label>Secondary Color</label>
+                        <input type="color" id="setting-secondary-color" value="#f8fafc">
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <h2>Contact</h2>
+                <div class="form-grid">
+                    <div class="input-box">
+                        <label>Phone</label>
+                        <input type="text" id="setting-phone" placeholder="+30 210 000 0000">
+                    </div>
+                    <div class="input-box">
+                        <label>Instagram</label>
+                        <input type="text" id="setting-instagram" placeholder="@bistro">
+                    </div>
+                    <div class="input-box span-2">
+                        <label>Address</label>
+                        <textarea id="setting-address" rows="3" placeholder="Restaurant street and city"></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <h2>Menu Content</h2>
+                <div class="form-grid">
+                    <div class="input-box">
+                        <label>Menu Title</label>
+                        <input type="text" id="setting-menu-title" placeholder="The Bistro Menu">
+                    </div>
+                    <div class="input-box">
+                        <label>Subtitle</label>
+                        <input type="text" id="setting-menu-subtitle" placeholder="Fresh ingredients - Crafted daily">
+                    </div>
+                    <div class="input-box span-2">
+                        <label>Customer Note</label>
+                        <textarea id="setting-menu-note" rows="3" placeholder="Browse our current dishes below..."></textarea>
+                    </div>
+                    <div class="input-box span-2">
+                        <label>Footer Text</label>
+                        <textarea id="setting-footer-text" rows="3" placeholder="Prices include VAT..."></textarea>
+                    </div>
+                    <div class="input-box">
+                        <label>Currency</label>
+                        <select id="setting-currency">
+                            <option value="€">€ Euro</option>
+                            <option value="$">$ Dollar</option>
+                            <option value="£">£ Pound</option>
+                        </select>
+                    </div>
+                    <div class="input-box">
+                        <label>Languages</label>
+                        <select id="setting-languages">
+                            <option value="en">English</option>
+                            <option value="el">Greek</option>
+                            <option value="en,el">English + Greek</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <div class="settings-actions">
+                <div class="settings-status" id="restaurant-settings-status"></div>
+                <button type="submit" class="btn-primary">Save Settings</button>
+            </div>
+        </form>
+    </main>
+
+    <script type="module">
+        import {
+            db,
+            auth,
+            doc,
+            onSnapshot,
+            setDoc,
+            onAuthStateChanged
+        } from "./firebase.js";
+
+        const DEFAULT_RESTAURANT_SETTINGS = {
+            restaurantName: 'Bistro',
+            logoUrl: '',
+            phone: '',
+            address: '',
+            instagram: '',
+            primaryColor: '#0f172a',
+            secondaryColor: '#f8fafc',
+            currency: '€',
+            languages: 'en,el',
+            title: 'The Bistro Menu',
+            subtitle: 'Fresh ingredients • Crafted daily',
+            note: 'Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.',
+            footerText: 'Prices include VAT. Ask our staff for daily specials and allergen information.'
+        };
+
+        const restaurantDocRef = doc(db, 'settings', 'restaurant');
+        const settingsForm = document.getElementById('restaurant-settings-form');
+        const settingsStatus = document.getElementById('restaurant-settings-status');
+
+        const fields = {
+            restaurantName: document.getElementById('setting-restaurant-name'),
+            logoUrl: document.getElementById('setting-logo-url'),
+            phone: document.getElementById('setting-phone'),
+            address: document.getElementById('setting-address'),
+            instagram: document.getElementById('setting-instagram'),
+            primaryColor: document.getElementById('setting-primary-color'),
+            secondaryColor: document.getElementById('setting-secondary-color'),
+            currency: document.getElementById('setting-currency'),
+            languages: document.getElementById('setting-languages'),
+            title: document.getElementById('setting-menu-title'),
+            subtitle: document.getElementById('setting-menu-subtitle'),
+            note: document.getElementById('setting-menu-note'),
+            footerText: document.getElementById('setting-footer-text')
+        };
+
+        function setStatus(message = '', isError = false) {
+            settingsStatus.textContent = message;
+            settingsStatus.style.color = isError ? '#dc2626' : '#64748b';
+        }
+
+        function fillForm(settings = {}) {
+            const data = { ...DEFAULT_RESTAURANT_SETTINGS, ...settings };
+            Object.entries(fields).forEach(([key, field]) => {
+                field.value = data[key] || DEFAULT_RESTAURANT_SETTINGS[key] || '';
+            });
+        }
+
+        settingsForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const submitButton = settingsForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Saving...';
+            setStatus('Saving settings...');
+
+            try {
+                await setDoc(restaurantDocRef, {
+                    restaurantName: fields.restaurantName.value.trim() || DEFAULT_RESTAURANT_SETTINGS.restaurantName,
+                    logoUrl: fields.logoUrl.value.trim(),
+                    phone: fields.phone.value.trim(),
+                    address: fields.address.value.trim(),
+                    instagram: fields.instagram.value.trim(),
+                    primaryColor: fields.primaryColor.value || DEFAULT_RESTAURANT_SETTINGS.primaryColor,
+                    secondaryColor: fields.secondaryColor.value || DEFAULT_RESTAURANT_SETTINGS.secondaryColor,
+                    currency: fields.currency.value || DEFAULT_RESTAURANT_SETTINGS.currency,
+                    languages: fields.languages.value || DEFAULT_RESTAURANT_SETTINGS.languages,
+                    title: fields.title.value.trim() || DEFAULT_RESTAURANT_SETTINGS.title,
+                    subtitle: fields.subtitle.value.trim() || DEFAULT_RESTAURANT_SETTINGS.subtitle,
+                    note: fields.note.value.trim() || DEFAULT_RESTAURANT_SETTINGS.note,
+                    footerText: fields.footerText.value.trim() || DEFAULT_RESTAURANT_SETTINGS.footerText
+                }, { merge: true });
+                setStatus('Saved.');
+                setTimeout(() => setStatus(''), 2200);
+            } catch (error) {
+                console.error('Could not save restaurant settings:', error);
+                setStatus('Could not save settings. Please try again.', true);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Save Settings';
+            }
+        });
+
+        let hasStartedSettingsPage = false;
+
+        function startSettingsPage() {
+            if (hasStartedSettingsPage) return;
+            hasStartedSettingsPage = true;
+
+            onSnapshot(restaurantDocRef, (snapshot) => {
+                fillForm(snapshot.exists() ? snapshot.data() : DEFAULT_RESTAURANT_SETTINGS);
+            }, (error) => {
+                console.error('Restaurant settings listener error:', error);
+                setStatus('Could not load restaurant settings.', true);
+            });
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.body.classList.remove('auth-checking');
+            startSettingsPage();
+        });
+    </script>
+</body>
+</html>
