@@ -200,6 +200,35 @@
             text-align: center;
         }
 
+        .wifi-info {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            max-width: 520px;
+            margin: -10px auto 24px;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .wifi-info.visible {
+            display: flex;
+        }
+
+        .wifi-info span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .wifi-info strong {
+            color: #0f172a;
+        }
+
         /* RESPONSIVE ΟΡΙΖΟΝΤΙΟ SCROLL ΣΤΙΣ ΚΑΤΗΓΟΡΙΕΣ */
         .categories { 
             display: flex; 
@@ -665,8 +694,14 @@
             }
 
             .menu-note {
-                margin-bottom: 18px;
+                margin-bottom: 14px;
                 font-size: 12px;
+            }
+
+            .wifi-info {
+                margin-bottom: 18px;
+                font-size: 11.5px;
+                gap: 7px;
             }
 
             .modal-photo {
@@ -708,6 +743,10 @@
             <h1 data-i18n="title">The Bistro Menu</h1>
             <p class="subtitle" data-i18n="subtitle">Fresh ingredients • Crafted daily</p>
             <p class="menu-note" data-i18n="note">Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.</p>
+            <div class="wifi-info" id="wifi-info" aria-live="polite">
+                <span>Wifi: <strong id="wifi-name"></strong></span>
+                <span>Password: <strong id="wifi-password"></strong></span>
+            </div>
         </header>
 
         <nav class="categories" id="customer-nav-container"></nav>
@@ -747,6 +786,8 @@
             phone: '',
             address: '',
             instagram: '',
+            wifiName: '',
+            wifiPassword: '',
             primaryColor: '#0f172a',
             secondaryColor: '#f8fafc',
             currency: '€',
@@ -937,12 +978,22 @@
             const subtitleEl = document.querySelector('[data-i18n="subtitle"]');
             const noteEl = document.querySelector('[data-i18n="note"]');
             const footerTextEl = document.querySelector('[data-i18n="footerText"]');
+            const wifiInfoEl = document.getElementById('wifi-info');
+            const wifiNameEl = document.getElementById('wifi-name');
+            const wifiPasswordEl = document.getElementById('wifi-password');
 
             if (brandEl) brandEl.textContent = restaurantSettings.restaurantName || t('brand');
             if (titleEl) titleEl.textContent = title;
             if (subtitleEl) subtitleEl.textContent = subtitle;
             if (noteEl) noteEl.textContent = note;
             if (footerTextEl) footerTextEl.textContent = footerText;
+            if (wifiInfoEl && wifiNameEl && wifiPasswordEl) {
+                const wifiName = restaurantSettings.wifiName || '';
+                const wifiPassword = restaurantSettings.wifiPassword || '';
+                wifiNameEl.textContent = wifiName;
+                wifiPasswordEl.textContent = wifiPassword;
+                wifiInfoEl.classList.toggle('visible', Boolean(wifiName || wifiPassword));
+            }
         }
 
         function displayCustomerMenu() {

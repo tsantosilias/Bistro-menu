@@ -267,6 +267,14 @@
                         <label>Instagram</label>
                         <input type="text" id="setting-instagram" placeholder="@bistro">
                     </div>
+                    <div class="input-box">
+                        <label>WiFi Name</label>
+                        <input type="text" id="setting-wifi-name" placeholder="Restaurant WiFi">
+                    </div>
+                    <div class="input-box">
+                        <label>WiFi Password</label>
+                        <input type="text" id="setting-wifi-password" placeholder="Password">
+                    </div>
                     <div class="input-box span-2">
                         <label>Address</label>
                         <textarea id="setting-address" rows="3" placeholder="Restaurant street and city"></textarea>
@@ -319,6 +327,8 @@
             phone: '',
             address: '',
             instagram: '',
+            wifiName: '',
+            wifiPassword: '',
             title: 'The Bistro Menu',
             subtitle: 'Fresh ingredients • Crafted daily',
             note: 'Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.',
@@ -335,6 +345,8 @@
             phone: document.getElementById('setting-phone'),
             address: document.getElementById('setting-address'),
             instagram: document.getElementById('setting-instagram'),
+            wifiName: document.getElementById('setting-wifi-name'),
+            wifiPassword: document.getElementById('setting-wifi-password'),
             title: document.getElementById('setting-menu-title'),
             subtitle: document.getElementById('setting-menu-subtitle'),
             note: document.getElementById('setting-menu-note'),
@@ -367,6 +379,8 @@
                     phone: fields.phone.value.trim(),
                     address: fields.address.value.trim(),
                     instagram: fields.instagram.value.trim(),
+                    wifiName: fields.wifiName.value.trim(),
+                    wifiPassword: fields.wifiPassword.value.trim(),
                     title: fields.title.value.trim() || DEFAULT_RESTAURANT_SETTINGS.title,
                     subtitle: fields.subtitle.value.trim() || DEFAULT_RESTAURANT_SETTINGS.subtitle,
                     note: fields.note.value.trim() || DEFAULT_RESTAURANT_SETTINGS.note,
