@@ -21,7 +21,7 @@
             min-height: 100vh;
             background: #f3f6fb;
             color: #0f172a;
-            padding: 26px;
+            padding: clamp(14px, 3vw, 26px);
         }
 
         body.auth-checking .settings-shell {
@@ -30,7 +30,7 @@
 
         .settings-shell {
             width: 100%;
-            max-width: 980px;
+            max-width: 820px;
             margin: 0 auto;
         }
 
@@ -70,7 +70,7 @@
             color: #64748b;
             font-size: 14px;
             line-height: 1.6;
-            max-width: 620px;
+            max-width: 560px;
         }
 
         .settings-card {
@@ -104,7 +104,7 @@
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 18px;
+            gap: 16px;
         }
 
         .form-grid .span-2 {
@@ -153,11 +153,6 @@
             box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
         }
 
-        .input-box input[type="color"] {
-            height: 46px;
-            padding: 6px;
-        }
-
         .settings-actions {
             display: flex;
             justify-content: flex-end;
@@ -199,11 +194,7 @@
             transform: none;
         }
 
-        @media (max-width: 720px) {
-            body {
-                padding: 16px;
-            }
-
+        @media (max-width: 760px) {
             .settings-header {
                 display: block;
             }
@@ -225,6 +216,18 @@
                 width: 100%;
             }
         }
+
+        @media (max-width: 460px) {
+            .settings-card {
+                border-radius: 14px;
+                padding: 18px;
+            }
+
+            .settings-section {
+                padding-bottom: 22px;
+                margin-bottom: 22px;
+            }
+        }
     </style>
 </head>
 <body class="auth-checking">
@@ -234,7 +237,7 @@
         <header class="settings-header">
             <div>
                 <h1>Restaurant Info</h1>
-                <p>Control the public menu branding, contact details, currency, language options, and customer-facing text.</p>
+                <p>Control the public menu branding, contact details, and customer-facing text.</p>
             </div>
         </header>
 
@@ -249,14 +252,6 @@
                     <div class="input-box">
                         <label>Logo URL</label>
                         <input type="url" id="setting-logo-url" placeholder="https://...">
-                    </div>
-                    <div class="input-box">
-                        <label>Primary Color</label>
-                        <input type="color" id="setting-primary-color" value="#0f172a">
-                    </div>
-                    <div class="input-box">
-                        <label>Secondary Color</label>
-                        <input type="color" id="setting-secondary-color" value="#f8fafc">
                     </div>
                 </div>
             </section>
@@ -298,22 +293,6 @@
                         <label>Footer Text</label>
                         <textarea id="setting-footer-text" rows="3" placeholder="Prices include VAT..."></textarea>
                     </div>
-                    <div class="input-box">
-                        <label>Currency</label>
-                        <select id="setting-currency">
-                            <option value="€">€ Euro</option>
-                            <option value="$">$ Dollar</option>
-                            <option value="£">£ Pound</option>
-                        </select>
-                    </div>
-                    <div class="input-box">
-                        <label>Languages</label>
-                        <select id="setting-languages">
-                            <option value="en">English</option>
-                            <option value="el">Greek</option>
-                            <option value="en,el">English + Greek</option>
-                        </select>
-                    </div>
                 </div>
             </section>
 
@@ -340,10 +319,6 @@
             phone: '',
             address: '',
             instagram: '',
-            primaryColor: '#0f172a',
-            secondaryColor: '#f8fafc',
-            currency: '€',
-            languages: 'en,el',
             title: 'The Bistro Menu',
             subtitle: 'Fresh ingredients • Crafted daily',
             note: 'Browse our current dishes below. Please let our team know about allergies or dietary needs before ordering.',
@@ -360,10 +335,6 @@
             phone: document.getElementById('setting-phone'),
             address: document.getElementById('setting-address'),
             instagram: document.getElementById('setting-instagram'),
-            primaryColor: document.getElementById('setting-primary-color'),
-            secondaryColor: document.getElementById('setting-secondary-color'),
-            currency: document.getElementById('setting-currency'),
-            languages: document.getElementById('setting-languages'),
             title: document.getElementById('setting-menu-title'),
             subtitle: document.getElementById('setting-menu-subtitle'),
             note: document.getElementById('setting-menu-note'),
@@ -396,10 +367,6 @@
                     phone: fields.phone.value.trim(),
                     address: fields.address.value.trim(),
                     instagram: fields.instagram.value.trim(),
-                    primaryColor: fields.primaryColor.value || DEFAULT_RESTAURANT_SETTINGS.primaryColor,
-                    secondaryColor: fields.secondaryColor.value || DEFAULT_RESTAURANT_SETTINGS.secondaryColor,
-                    currency: fields.currency.value || DEFAULT_RESTAURANT_SETTINGS.currency,
-                    languages: fields.languages.value || DEFAULT_RESTAURANT_SETTINGS.languages,
                     title: fields.title.value.trim() || DEFAULT_RESTAURANT_SETTINGS.title,
                     subtitle: fields.subtitle.value.trim() || DEFAULT_RESTAURANT_SETTINGS.subtitle,
                     note: fields.note.value.trim() || DEFAULT_RESTAURANT_SETTINGS.note,
