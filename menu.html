@@ -462,19 +462,58 @@
 
         .menu-footer {
             margin-top: 34px;
-            padding: 22px 0 4px;
-            border-top: 1px solid #f1f5f9;
+            padding: 24px 12px 8px;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
             text-align: center;
             color: #64748b;
-            font-size: 12px;
-            line-height: 1.7;
+            font-size: 13px;
+            line-height: 1.6;
         }
 
         .menu-footer strong {
             display: block;
             color: #0f172a;
-            font-size: 14px;
-            margin-bottom: 4px;
+            font-size: 15px;
+            margin-bottom: 6px;
+            letter-spacing: 0;
+        }
+
+        .footer-copy {
+            display: block;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .footer-contact {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .footer-contact span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            min-height: 30px;
+            padding: 6px 12px;
+            border: 1px solid rgba(15, 23, 42, 0.1);
+            border-radius: 999px;
+            background: #f8fafc;
+            color: #475569;
+            font-size: 12px;
+            line-height: 1.2;
+        }
+
+        .footer-contact strong {
+            display: inline;
+            margin: 0;
+            color: #0f172a;
+            font-family: 'Inter', 'Noto Sans Greek', sans-serif;
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 700;
         }
 
         .customer-modal {
@@ -757,7 +796,11 @@
 
         <footer class="menu-footer">
             <strong data-i18n="footerTitle">Thank you for visiting</strong>
-            <span data-i18n="footerText">Prices include VAT. Ask our staff for daily specials and allergen information.</span>
+            <span class="footer-copy" data-i18n="footerText">Prices include VAT. Ask our staff for daily specials and allergen information.</span>
+            <div class="footer-contact" id="footer-contact" hidden>
+                <span id="footer-phone-wrap" hidden><strong>Tel:</strong><span id="footer-phone"></span></span>
+                <span id="footer-social-wrap" hidden><strong>Social:</strong><span id="footer-social"></span></span>
+            </div>
         </footer>
     </div>
 
@@ -966,19 +1009,17 @@
             const title = restaurantSettings.restaurantName || restaurantSettings.title || t('title');
             const subtitle = restaurantSettings.subtitle || t('subtitle');
             const note = restaurantSettings.note || t('note');
-            const contactParts = [
-                restaurantSettings.address,
-                restaurantSettings.phone,
-                restaurantSettings.instagram
-            ].filter(Boolean);
-            const footerText = [restaurantSettings.footerText || t('footerText'), ...contactParts]
-                .filter(Boolean)
-                .join(' ');
+            const footerText = restaurantSettings.footerText || t('footerText');
 
             const titleEl = document.querySelector('[data-i18n="title"]');
             const subtitleEl = document.querySelector('[data-i18n="subtitle"]');
             const noteEl = document.querySelector('[data-i18n="note"]');
             const footerTextEl = document.querySelector('[data-i18n="footerText"]');
+            const footerContactEl = document.getElementById('footer-contact');
+            const footerPhoneWrap = document.getElementById('footer-phone-wrap');
+            const footerPhoneEl = document.getElementById('footer-phone');
+            const footerSocialWrap = document.getElementById('footer-social-wrap');
+            const footerSocialEl = document.getElementById('footer-social');
             const logoEl = document.getElementById('restaurant-logo');
             const wifiInfoEl = document.getElementById('wifi-info');
             const wifiNameEl = document.getElementById('wifi-name');
@@ -992,6 +1033,13 @@
             if (subtitleEl) subtitleEl.textContent = subtitle;
             if (noteEl) noteEl.textContent = note;
             if (footerTextEl) footerTextEl.textContent = footerText;
+            const phone = String(restaurantSettings.phone || '').trim();
+            const social = String(restaurantSettings.instagram || '').trim();
+            if (footerPhoneEl) footerPhoneEl.textContent = phone;
+            if (footerSocialEl) footerSocialEl.textContent = social;
+            if (footerPhoneWrap) footerPhoneWrap.hidden = !phone;
+            if (footerSocialWrap) footerSocialWrap.hidden = !social;
+            if (footerContactEl) footerContactEl.hidden = !phone && !social;
             if (wifiInfoEl && wifiNameEl && wifiPasswordEl) {
                 const wifiName = restaurantSettings.wifiName || '';
                 const wifiPassword = restaurantSettings.wifiPassword || '';
