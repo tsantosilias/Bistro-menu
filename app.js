@@ -144,6 +144,30 @@ function readableAuthError(error) {
     return 'Could not sign in. Check that Email/Password auth is enabled in Firebase.';
 }
 
+// Converts Firebase write/listener errors into messages a restaurant owner can act on.
+function readableDataError(error, action = 'save this change') {
+    const code = error && error.code ? error.code : '';
+    const message = error && error.message ? error.message : '';
+
+    if (code.includes('permission-denied') || message.includes('Missing or insufficient permissions')) {
+        return `Permission denied. Log in with the admin account, or add this user's Firebase UID in Firestore under admins/{uid}.`;
+    }
+
+    if (code.includes('unauthenticated')) {
+        return `Your admin session expired. Log out, sign in again, and try to ${action}.`;
+    }
+
+    if (code.includes('unavailable') || code.includes('network-request-failed')) {
+        return `Firebase is not reachable right now. Check the internet connection and try again.`;
+    }
+
+    if (code.includes('resource-exhausted')) {
+        return `Firebase quota was reached. Wait a bit or check the Firebase usage limits.`;
+    }
+
+    return `Could not ${action}. Please try again.`;
+}
+
 function clearFirebaseSubscriptions() {
     firebaseUnsubscribers.forEach((unsubscribe) => unsubscribe());
     firebaseUnsubscribers = [];
@@ -270,23 +294,29 @@ if (window.Sortable && menuTableBody) {
     new Sortable(menuTableBody, {
         animation: 150, ghostClass: 'sortable-ghost', handle: '.drag-handle', 
         onEnd: async function () {
-            const newlyOrderedItems = [];
-            const rows = menuTableBody.querySelectorAll('tr');
-            rows.forEach((row, index) => {
-                const id = row.getAttribute('data-id');
-                const item = menuItems.find(i => i.id === id);
-                if (item) { item.order = index + 1; newlyOrderedItems.push(item); }
-            });
-            // Preserve hidden-by-filter items so a partial view reorder does not drop them.
-            if (currentFilter !== 'All' || currentSearchQuery !== '') {
-                menuItems.forEach(item => { if (!newlyOrderedItems.some(n => n.id === item.id)) newlyOrderedItems.push(item); });
+            try {
+                const newlyOrderedItems = [];
+                const rows = menuTableBody.querySelectorAll('tr');
+                rows.forEach((row, index) => {
+                    const id = row.getAttribute('data-id');
+                    const item = menuItems.find(i => i.id === id);
+                    if (item) { item.order = index + 1; newlyOrderedItems.push(item); }
+                });
+                // Preserve hidden-by-filter items so a partial view reorder does not drop them.
+                if (currentFilter !== 'All' || currentSearchQuery !== '') {
+                    menuItems.forEach(item => { if (!newlyOrderedItems.some(n => n.id === item.id)) newlyOrderedItems.push(item); });
+                }
+                menuItems = newlyOrderedItems;
+                await Promise.all(menuItems.map((item, index) =>
+                    updateDoc(doc(db, 'menuItems', item.id), { order: index + 1 })
+                ));
+                calculateCalculatedStats();
+                renderDashboard();
+            } catch (error) {
+                console.error('Could not reorder menu items:', error);
+                alert(readableDataError(error, 'reorder the menu'));
+                renderDashboard();
             }
-            menuItems = newlyOrderedItems;
-            await Promise.all(menuItems.map((item, index) => 
-                updateDoc(doc(db, 'menuItems', item.id), { order: index + 1 })
-            ));
-            calculateCalculatedStats();
-            renderDashboard(); 
         }
     });
 } else {
@@ -363,7 +393,12 @@ function renderDashboard() {
 window.toggleHideItem = async function(id) {
     const item = menuItems.find(i => i.id === id);
     if (item) {
-        await updateDoc(doc(db, 'menuItems', id), { hidden: !item.hidden });
+        try {
+            await updateDoc(doc(db, 'menuItems', id), { hidden: !item.hidden });
+        } catch (error) {
+            console.error('Could not update availability:', error);
+            alert(readableDataError(error, 'update availability'));
+        }
     }
 };
 
@@ -459,7 +494,9 @@ menuForm.addEventListener('submit', async (e) => {
         closeMobileSidebar();
     } catch (error) {
         console.error('Could not add dish:', error);
-        alert('The dish could not be saved. If you added a photo, check your Cloudinary upload preset and internet connection.');
+        alert(error.message && error.message.includes('Cloudinary')
+            ? 'Photo upload failed. Check Cloudinary preset and internet connection.'
+            : readableDataError(error, 'add this dish'));
     } finally {
         if (submitButton) {
             submitButton.disabled = false;
@@ -473,13 +510,18 @@ menuForm.addEventListener('submit', async (e) => {
 // ============================================================================
 async function deleteItem(id) {
     if(confirm("Are you sure you want to remove this dish?")) {
-        await deleteDoc(doc(db, 'menuItems', id));
-        const remainingItems = menuItems
-            .filter(item => item.id !== id)
-            .sort((a, b) => parseInt(a.order || 0) - parseInt(b.order || 0));
-        await Promise.all(remainingItems.map((item, index) => 
-            updateDoc(doc(db, 'menuItems', item.id), { order: index + 1 })
-        ));
+        try {
+            await deleteDoc(doc(db, 'menuItems', id));
+            const remainingItems = menuItems
+                .filter(item => item.id !== id)
+                .sort((a, b) => parseInt(a.order || 0) - parseInt(b.order || 0));
+            await Promise.all(remainingItems.map((item, index) =>
+                updateDoc(doc(db, 'menuItems', item.id), { order: index + 1 })
+            ));
+        } catch (error) {
+            console.error('Could not delete dish:', error);
+            alert(readableDataError(error, 'delete this dish'));
+        }
     }
 }
 window.deleteItem = deleteItem;
@@ -541,7 +583,9 @@ editForm.addEventListener('submit', async (e) => {
             editModal.classList.add('hidden');
         } catch (error) {
             console.error('Could not update dish:', error);
-            alert('The dish could not be updated. If you added a photo, check your Cloudinary upload preset and internet connection.');
+            alert(error.message && error.message.includes('Cloudinary')
+                ? 'Photo upload failed. Check Cloudinary preset and internet connection.'
+                : readableDataError(error, 'update this dish'));
         } finally {
             if (submitButton) {
                 submitButton.disabled = false;
@@ -583,7 +627,7 @@ if (restaurantSettingsForm) {
             setTimeout(() => setRestaurantSettingsStatus(''), 2200);
         } catch (error) {
             console.error('Could not save restaurant settings:', error);
-            setRestaurantSettingsStatus('Could not save restaurant info.', true);
+            setRestaurantSettingsStatus(readableDataError(error, 'save restaurant info'), true);
         } finally {
             if (submitButton) {
                 submitButton.disabled = false;
@@ -608,7 +652,10 @@ function subscribeToFirebase() {
             localStorage.removeItem('categoryOrder');
         }
         renderDashboard();
-    }, (error) => console.error('Category listener error:', error));
+    }, (error) => {
+        console.error('Category listener error:', error);
+        alert(readableDataError(error, 'load categories'));
+    });
 
     const unsubscribeMenuItems = onSnapshot(menuItemsRef, async (snapshot) => {
         if (!hasAttemptedLocalMenuMigration && snapshot.empty) {
@@ -627,13 +674,16 @@ function subscribeToFirebase() {
             ...menuDoc.data()
         }));
         renderDashboard();
-    }, (error) => console.error('Menu listener error:', error));
+    }, (error) => {
+        console.error('Menu listener error:', error);
+        alert(readableDataError(error, 'load menu items'));
+    });
 
     const unsubscribeRestaurant = onSnapshot(restaurantDocRef, (snapshot) => {
         fillRestaurantSettingsForm(snapshot.exists() ? snapshot.data() : DEFAULT_RESTAURANT_SETTINGS);
     }, (error) => {
         console.error('Restaurant settings listener error:', error);
-        setRestaurantSettingsStatus('Could not load restaurant info.', true);
+        setRestaurantSettingsStatus(readableDataError(error, 'load restaurant info'), true);
     });
 
     firebaseUnsubscribers.push(unsubscribeCategories, unsubscribeMenuItems, unsubscribeRestaurant);

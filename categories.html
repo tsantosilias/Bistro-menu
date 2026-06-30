@@ -220,21 +220,43 @@
         const newCatInput = document.getElementById('new-cat-input');
         const categoryPageList = document.getElementById('category-page-list');
 
+        // Keeps Firebase permission errors readable for non-developers.
+        function readableDataError(error, action = 'save categories') {
+            const code = error && error.code ? error.code : '';
+            const message = error && error.message ? error.message : '';
+
+            if (code.includes('permission-denied') || message.includes('Missing or insufficient permissions')) {
+                return `Permission denied. Log in with the admin account, or add this user's Firebase UID in Firestore under admins/{uid}.`;
+            }
+
+            if (code.includes('unavailable') || code.includes('network-request-failed')) {
+                return 'Firebase is not reachable right now. Check the internet connection and try again.';
+            }
+
+            return `Could not ${action}. Please try again.`;
+        }
+
         // Drag and drop writes the new category order directly to Firestore.
         const sortableCategories = new Sortable(categoryPageList, {
             animation: 150,
             ghostClass: 'sortable-ghost',
             handle: '.category-drag-handle',
-            
+
             onEnd: async function () {
-                let newOrder = [];
-                const items = categoryPageList.querySelectorAll('.category-item');
-                items.forEach(item => {
-                    newOrder.push(item.getAttribute('data-name'));
-                });
-                
-                categoryOrder = newOrder;
-                await setDoc(categoriesDocRef, { order: categoryOrder });
+                try {
+                    let newOrder = [];
+                    const items = categoryPageList.querySelectorAll('.category-item');
+                    items.forEach(item => {
+                        newOrder.push(item.getAttribute('data-name'));
+                    });
+
+                    categoryOrder = newOrder;
+                    await setDoc(categoriesDocRef, { order: categoryOrder });
+                } catch (error) {
+                    console.error('Could not reorder categories:', error);
+                    alert(readableDataError(error, 'reorder categories'));
+                    renderCategoriesPage();
+                }
             }
         });
 
@@ -264,16 +286,23 @@
         categoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newCat = newCatInput.value.trim();
-            
+
             if(categoryOrder.map(c => c.toLowerCase()).includes(newCat.toLowerCase())) {
                 alert("This category already exists!");
                 return;
             }
 
             categoryOrder.push(newCat);
-            await setDoc(categoriesDocRef, { order: categoryOrder });
-            newCatInput.value = '';
-            renderCategoriesPage();
+            try {
+                await setDoc(categoriesDocRef, { order: categoryOrder });
+                newCatInput.value = '';
+                renderCategoriesPage();
+            } catch (error) {
+                categoryOrder = categoryOrder.filter(cat => cat !== newCat);
+                console.error('Could not create category:', error);
+                alert(readableDataError(error, 'create this category'));
+                renderCategoriesPage();
+            }
         });
 
         let hasStartedCategoryManager = false;
@@ -292,7 +321,10 @@
                     await setDoc(categoriesDocRef, { order: DEFAULT_CATEGORIES });
                 }
                 renderCategoriesPage();
-            }, (error) => console.error('Category listener error:', error));
+            }, (error) => {
+                console.error('Category listener error:', error);
+                alert(readableDataError(error, 'load categories'));
+            });
         }
 
         onAuthStateChanged(auth, (user) => {

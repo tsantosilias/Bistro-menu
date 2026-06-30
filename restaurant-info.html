@@ -185,6 +185,51 @@
             margin-right: auto;
         }
 
+        .section-help {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: -8px 0 16px;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .tool-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            background: #f8fafc;
+            padding: 16px;
+        }
+
+        .tool-card h3 {
+            font-size: 14px;
+            color: #0f172a;
+            margin-bottom: 7px;
+        }
+
+        .tool-card p {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .tool-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .file-input {
+            width: 100%;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
         .btn-primary {
             min-width: 160px;
             background: #0f172a;
@@ -209,6 +254,66 @@
             transform: none;
         }
 
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            background: #ffffff;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+        }
+
+        .qr-tools {
+            display: grid;
+            grid-template-columns: 180px minmax(0, 1fr);
+            gap: 18px;
+            align-items: center;
+        }
+
+        .qr-code-box {
+            width: 168px;
+            min-height: 168px;
+            display: grid;
+            place-items: center;
+            padding: 10px;
+            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        }
+
+        .menu-link-output {
+            width: 100%;
+            margin-bottom: 12px;
+            padding: 12px 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            color: #334155;
+            background: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
         @media (max-width: 760px) {
             .settings-header {
                 display: block;
@@ -216,6 +321,15 @@
 
             .form-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .tool-grid,
+            .qr-tools {
+                grid-template-columns: 1fr;
+            }
+
+            .qr-code-box {
+                width: 100%;
             }
 
             .form-grid .span-2 {
@@ -227,7 +341,8 @@
             }
 
             .settings-status,
-            .btn-primary {
+            .btn-primary,
+            .btn-secondary {
                 width: 100%;
             }
         }
@@ -316,6 +431,42 @@
                 </div>
             </section>
 
+            <section class="settings-section">
+                <h2>Menu Backup</h2>
+                <p class="section-help">Export a JSON backup before big changes. Import replaces the current menu items, categories, and restaurant info with the selected backup file.</p>
+                <div class="tool-grid">
+                    <div class="tool-card">
+                        <h3>Export backup</h3>
+                        <p>Downloads all dishes, category order, restaurant info, badges, prices, and photo URLs.</p>
+                        <button type="button" class="btn-secondary" id="export-backup-btn">Export JSON</button>
+                    </div>
+                    <div class="tool-card">
+                        <h3>Import backup</h3>
+                        <p>Restores a previously exported JSON backup. Existing menu items will be replaced after confirmation.</p>
+                        <input class="file-input" type="file" id="import-backup-file" accept=".json,application/json">
+                        <button type="button" class="btn-secondary" id="import-backup-btn">Import Backup</button>
+                    </div>
+                </div>
+                <div class="settings-status" id="backup-status"></div>
+            </section>
+
+            <section class="settings-section">
+                <h2>QR Menu Tools</h2>
+                <p class="section-help">Use this QR code for tables, cards, and print material. It points directly to the customer menu page.</p>
+                <div class="qr-tools">
+                    <div class="qr-code-box" id="restaurant-info-qr"></div>
+                    <div>
+                        <input class="menu-link-output" id="menu-link-output" type="text" readonly>
+                        <div class="tool-actions">
+                            <button type="button" class="btn-secondary" id="copy-menu-link-btn">Copy Link</button>
+                            <button type="button" class="btn-secondary" id="download-qr-btn">Download PNG</button>
+                            <button type="button" class="btn-secondary" id="print-qr-card-btn">Print Card</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-status" id="qr-status"></div>
+            </section>
+
             <div class="settings-actions">
                 <div class="settings-status" id="restaurant-settings-status"></div>
                 <button type="submit" class="btn-primary">Save Settings</button>
@@ -323,10 +474,15 @@
         </form>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script type="module">
         import {
             db,
             auth,
+            collection,
+            addDoc,
+            getDocs,
+            deleteDoc,
             doc,
             onSnapshot,
             setDoc,
@@ -348,12 +504,26 @@
         const CLOUDINARY_CLOUD_NAME = 'dzz4waa9e';
         const CLOUDINARY_UPLOAD_PRESET = 'bistro_menu_uploads';
 
+        const menuItemsRef = collection(db, 'menuItems');
         const restaurantDocRef = doc(db, 'settings', 'restaurant');
+        const categoriesDocRef = doc(db, 'settings', 'categories');
         const settingsForm = document.getElementById('restaurant-settings-form');
         const settingsStatus = document.getElementById('restaurant-settings-status');
         const logoFileInput = document.getElementById('setting-logo-file');
         const logoPreview = document.getElementById('logo-preview');
+        const exportBackupButton = document.getElementById('export-backup-btn');
+        const importBackupButton = document.getElementById('import-backup-btn');
+        const importBackupFile = document.getElementById('import-backup-file');
+        const backupStatus = document.getElementById('backup-status');
+        const qrStatus = document.getElementById('qr-status');
+        const qrContainer = document.getElementById('restaurant-info-qr');
+        const menuLinkOutput = document.getElementById('menu-link-output');
+        const copyMenuLinkButton = document.getElementById('copy-menu-link-btn');
+        const downloadQrButton = document.getElementById('download-qr-btn');
+        const printQrCardButton = document.getElementById('print-qr-card-btn');
         let currentLogoUrl = '';
+        let currentRestaurantSettings = { ...DEFAULT_RESTAURANT_SETTINGS };
+        let currentCategoryOrder = ['Mains', 'Drinks', 'Desserts'];
 
         const fields = {
             restaurantName: document.getElementById('setting-restaurant-name'),
@@ -366,6 +536,156 @@
             note: document.getElementById('setting-menu-note'),
             footerText: document.getElementById('setting-footer-text')
         };
+
+        // Converts Firebase errors into messages that explain the likely fix.
+        function readableDataError(error, action = 'save this change') {
+            const code = error && error.code ? error.code : '';
+            const message = error && error.message ? error.message : '';
+
+            if (code.includes('permission-denied') || message.includes('Missing or insufficient permissions')) {
+                return `Permission denied. Log in with the admin account, or add this user's Firebase UID in Firestore under admins/{uid}.`;
+            }
+
+            if (code.includes('unauthenticated')) {
+                return `Your admin session expired. Log out, sign in again, and try to ${action}.`;
+            }
+
+            if (code.includes('unavailable') || code.includes('network-request-failed')) {
+                return 'Firebase is not reachable right now. Check the internet connection and try again.';
+            }
+
+            return `Could not ${action}. Please try again.`;
+        }
+
+        function setBackupStatus(message = '', isError = false) {
+            backupStatus.textContent = message;
+            backupStatus.style.color = isError ? '#dc2626' : '#64748b';
+        }
+
+        function setQrStatus(message = '', isError = false) {
+            qrStatus.textContent = message;
+            qrStatus.style.color = isError ? '#dc2626' : '#64748b';
+        }
+
+        function escapeHTML(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Builds the same public menu URL whether this page is local or on GitHub Pages.
+        function getCustomerMenuUrl() {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.search = '';
+            currentUrl.hash = '';
+
+            if (currentUrl.pathname.endsWith('/')) {
+                currentUrl.pathname += 'menu.html';
+                return currentUrl.toString();
+            }
+
+            const pathParts = currentUrl.pathname.split('/');
+            const lastPart = pathParts[pathParts.length - 1];
+
+            if (lastPart.includes('.')) {
+                pathParts[pathParts.length - 1] = 'menu.html';
+            } else {
+                pathParts.push('menu.html');
+            }
+
+            currentUrl.pathname = pathParts.join('/');
+            return currentUrl.toString();
+        }
+
+        function getQrImageDataUrl() {
+            const qrImage = qrContainer.querySelector('img');
+            const qrCanvas = qrContainer.querySelector('canvas');
+
+            if (qrImage && qrImage.src && qrImage.src.startsWith('data:image')) {
+                return qrImage.src;
+            }
+
+            if (qrCanvas) {
+                return qrCanvas.toDataURL('image/png');
+            }
+
+            return '';
+        }
+
+        function downloadJsonFile(fileName, data) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const downloadUrl = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(downloadUrl);
+        }
+
+        function readJsonFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    try {
+                        resolve(JSON.parse(reader.result));
+                    } catch {
+                        reject(new Error('The selected file is not valid JSON.'));
+                    }
+                };
+                reader.onerror = () => reject(new Error('Could not read the selected file.'));
+                reader.readAsText(file);
+            });
+        }
+
+        function cleanBackupItem(rawItem = {}, index = 0) {
+            const itemId = typeof rawItem.id === 'string' && /^[A-Za-z0-9_-]{1,120}$/.test(rawItem.id)
+                ? rawItem.id
+                : '';
+
+            return {
+                id: itemId,
+                data: {
+                    name: String(rawItem.name || `Menu Item ${index + 1}`).trim(),
+                    nameEl: String(rawItem.nameEl || '').trim(),
+                    description: String(rawItem.description || '').trim(),
+                    descriptionEl: String(rawItem.descriptionEl || '').trim(),
+                    imageUrl: String(rawItem.imageUrl || '').trim(),
+                    imagePublicId: String(rawItem.imagePublicId || '').trim(),
+                    order: Number.isFinite(Number(rawItem.order)) ? Number(rawItem.order) : index + 1,
+                    price: Number.isFinite(Number(rawItem.price)) ? Number(rawItem.price) : 0,
+                    category: String(rawItem.category || 'Mains').trim(),
+                    hidden: Boolean(rawItem.hidden),
+                    badges: Array.isArray(rawItem.badges) ? rawItem.badges.filter(Boolean).slice(0, 8) : []
+                }
+            };
+        }
+
+        function normalizeBackupPayload(payload) {
+            if (!payload || typeof payload !== 'object') {
+                throw new Error('Backup file has the wrong format.');
+            }
+
+            const menuItems = Array.isArray(payload.menuItems)
+                ? payload.menuItems.map(cleanBackupItem)
+                : [];
+
+            const categories = Array.isArray(payload.categories)
+                ? payload.categories.map(category => String(category || '').trim()).filter(Boolean)
+                : [...new Set(menuItems.map(item => item.data.category).filter(Boolean))];
+
+            return {
+                restaurantSettings: payload.restaurantSettings && typeof payload.restaurantSettings === 'object'
+                    ? payload.restaurantSettings
+                    : {},
+                categories: categories.length > 0 ? categories : ['Mains', 'Drinks', 'Desserts'],
+                menuItems
+            };
+        }
 
         async function uploadLogo(file) {
             if (!file) return '';
@@ -396,6 +716,7 @@
 
         function fillForm(settings = {}) {
             const data = { ...DEFAULT_RESTAURANT_SETTINGS, ...settings };
+            currentRestaurantSettings = data;
             currentLogoUrl = data.logoUrl || '';
             Object.entries(fields).forEach(([key, field]) => {
                 field.value = data[key] || DEFAULT_RESTAURANT_SETTINGS[key] || '';
@@ -404,6 +725,206 @@
                 logoPreview.src = currentLogoUrl;
                 logoPreview.classList.toggle('visible', Boolean(currentLogoUrl));
             }
+        }
+
+        async function exportMenuBackup() {
+            setBackupStatus('Preparing backup...');
+            exportBackupButton.disabled = true;
+
+            try {
+                const menuSnapshot = await getDocs(menuItemsRef);
+                const menuItems = menuSnapshot.docs.map(menuDoc => ({
+                    id: menuDoc.id,
+                    ...menuDoc.data()
+                }));
+
+                const backup = {
+                    app: 'Bistro Menu',
+                    version: 1,
+                    exportedAt: new Date().toISOString(),
+                    restaurantSettings: currentRestaurantSettings,
+                    categories: currentCategoryOrder,
+                    menuItems
+                };
+
+                const dateStamp = new Date().toISOString().slice(0, 10);
+                downloadJsonFile(`bistro-menu-backup-${dateStamp}.json`, backup);
+                setBackupStatus(`Backup exported with ${menuItems.length} menu items.`);
+            } catch (error) {
+                console.error('Could not export menu backup:', error);
+                setBackupStatus(readableDataError(error, 'export the backup'), true);
+            } finally {
+                exportBackupButton.disabled = false;
+            }
+        }
+
+        async function importMenuBackup() {
+            const selectedFile = importBackupFile.files && importBackupFile.files[0]
+                ? importBackupFile.files[0]
+                : null;
+
+            if (!selectedFile) {
+                setBackupStatus('Choose a JSON backup file first.', true);
+                return;
+            }
+
+            try {
+                const payload = normalizeBackupPayload(await readJsonFile(selectedFile));
+                const confirmed = window.confirm(
+                    `Import ${payload.menuItems.length} menu items and replace the current menu data? This cannot be undone from the app.`
+                );
+
+                if (!confirmed) return;
+
+                setBackupStatus('Importing backup...');
+                importBackupButton.disabled = true;
+
+                // Replace means: delete current menu item documents, then write the backup items.
+                const existingMenuSnapshot = await getDocs(menuItemsRef);
+                await Promise.all(existingMenuSnapshot.docs.map(menuDoc => deleteDoc(menuDoc.ref)));
+
+                await Promise.all(payload.menuItems.map(item => {
+                    return item.id
+                        ? setDoc(doc(db, 'menuItems', item.id), item.data)
+                        : addDoc(menuItemsRef, item.data);
+                }));
+
+                await setDoc(categoriesDocRef, { order: payload.categories });
+                await setDoc(restaurantDocRef, {
+                    ...DEFAULT_RESTAURANT_SETTINGS,
+                    ...payload.restaurantSettings
+                }, { merge: true });
+
+                importBackupFile.value = '';
+                setBackupStatus(`Backup imported. Restored ${payload.menuItems.length} menu items.`);
+            } catch (error) {
+                console.error('Could not import menu backup:', error);
+                setBackupStatus(error.code
+                    ? readableDataError(error, 'import the backup')
+                    : error.message || 'Could not import the backup.', true);
+            } finally {
+                importBackupButton.disabled = false;
+            }
+        }
+
+        function initializeQrTools() {
+            const menuUrl = getCustomerMenuUrl();
+            menuLinkOutput.value = menuUrl;
+
+            if (!qrContainer || !window.QRCode) {
+                setQrStatus('QR library did not load. Refresh the page and try again.', true);
+                return;
+            }
+
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: menuUrl,
+                width: 148,
+                height: 148,
+                colorDark: '#0f172a',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        async function copyMenuLink() {
+            try {
+                await navigator.clipboard.writeText(menuLinkOutput.value);
+                setQrStatus('Menu link copied.');
+                setTimeout(() => setQrStatus(''), 1800);
+            } catch (error) {
+                console.error('Could not copy menu link:', error);
+                menuLinkOutput.select();
+                setQrStatus('Copy failed. Select the link and copy it manually.', true);
+            }
+        }
+
+        function downloadQrPng() {
+            const dataUrl = getQrImageDataUrl();
+
+            if (!dataUrl) {
+                setQrStatus('QR code is still generating. Try again in a second.', true);
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = 'Bistro_Menu_QR.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setQrStatus('QR PNG downloaded.');
+            setTimeout(() => setQrStatus(''), 1800);
+        }
+
+        function printQrCard() {
+            const dataUrl = getQrImageDataUrl();
+
+            if (!dataUrl) {
+                setQrStatus('QR code is still generating. Try again in a second.', true);
+                return;
+            }
+
+            const restaurantName = currentRestaurantSettings.restaurantName || DEFAULT_RESTAURANT_SETTINGS.restaurantName;
+            const printWindow = window.open('', '_blank', 'width=520,height=720');
+
+            if (!printWindow) {
+                setQrStatus('Popup blocked. Allow popups to print the QR card.', true);
+                return;
+            }
+
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${escapeHTML(restaurantName)} QR Menu</title>
+                    <style>
+                        * { box-sizing: border-box; }
+                        body {
+                            margin: 0;
+                            min-height: 100vh;
+                            display: grid;
+                            place-items: center;
+                            font-family: Arial, sans-serif;
+                            color: #0f172a;
+                            background: #f8fafc;
+                        }
+                        .qr-card {
+                            width: 360px;
+                            padding: 34px 28px;
+                            text-align: center;
+                            background: #ffffff;
+                            border: 1px solid #e2e8f0;
+                            border-radius: 18px;
+                        }
+                        h1 { margin: 0 0 8px; font-size: 26px; }
+                        p { margin: 0 0 22px; color: #475569; font-size: 15px; }
+                        img { width: 220px; height: 220px; }
+                        .url { margin-top: 20px; font-size: 11px; color: #64748b; overflow-wrap: anywhere; }
+                        @media print {
+                            body { background: #ffffff; }
+                            .qr-card { border: 1px solid #cbd5e1; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="qr-card">
+                        <h1>${escapeHTML(restaurantName)}</h1>
+                        <p>Scan to view our menu</p>
+                        <img src="${dataUrl}" alt="Menu QR code">
+                        <div class="url">${escapeHTML(menuLinkOutput.value)}</div>
+                    </div>
+                    <script>
+                        window.onload = () => {
+                            window.print();
+                            window.onafterprint = () => window.close();
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            setQrStatus('Print card opened.');
         }
 
         settingsForm.addEventListener('submit', async (event) => {
@@ -436,12 +957,20 @@
                 setTimeout(() => setStatus(''), 2200);
             } catch (error) {
                 console.error('Could not save restaurant settings:', error);
-                setStatus('Could not save settings. Please try again.', true);
+                setStatus(error.message && error.message.includes('Cloudinary')
+                    ? 'Logo upload failed. Check Cloudinary preset and internet connection.'
+                    : readableDataError(error, 'save restaurant settings'), true);
             } finally {
                 submitButton.disabled = false;
                 submitButton.textContent = 'Save Settings';
             }
         });
+
+        exportBackupButton.addEventListener('click', exportMenuBackup);
+        importBackupButton.addEventListener('click', importMenuBackup);
+        copyMenuLinkButton.addEventListener('click', copyMenuLink);
+        downloadQrButton.addEventListener('click', downloadQrPng);
+        printQrCardButton.addEventListener('click', printQrCard);
 
         let hasStartedSettingsPage = false;
 
@@ -449,11 +978,22 @@
             if (hasStartedSettingsPage) return;
             hasStartedSettingsPage = true;
 
+            initializeQrTools();
+
             onSnapshot(restaurantDocRef, (snapshot) => {
                 fillForm(snapshot.exists() ? snapshot.data() : DEFAULT_RESTAURANT_SETTINGS);
             }, (error) => {
                 console.error('Restaurant settings listener error:', error);
-                setStatus('Could not load restaurant settings.', true);
+                setStatus(readableDataError(error, 'load restaurant settings'), true);
+            });
+
+            onSnapshot(categoriesDocRef, (snapshot) => {
+                currentCategoryOrder = snapshot.exists() && Array.isArray(snapshot.data().order)
+                    ? snapshot.data().order
+                    : currentCategoryOrder;
+            }, (error) => {
+                console.error('Category settings listener error:', error);
+                setBackupStatus(readableDataError(error, 'load category settings'), true);
             });
         }
 
