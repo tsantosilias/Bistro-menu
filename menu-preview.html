@@ -559,43 +559,75 @@
             font-weight: 700;
         }
 
-        /* Preview-only direction: editorial header, refined tabs, and a dark premium footer. */
+        /* Preview-only direction: closer to option 1, ultra-clean white with a dark footer strip. */
         .menu-wrapper {
             max-width: 430px;
             padding: 28px 20px 20px;
             border-radius: 18px;
-            border: 1px solid rgba(190, 145, 78, 0.22);
-            box-shadow: 0 26px 64px rgba(0, 0, 0, 0.24);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 26px 64px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-wrapper::before {
+            content: "☰";
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            color: #0b0f17;
+            font-size: 18px;
+            line-height: 1;
+            z-index: 21;
         }
 
         header {
-            padding-top: 22px;
+            padding-top: 34px;
             text-align: center;
         }
 
         header::before {
-            content: "BISTRO";
+            content: "";
             display: block;
-            margin-bottom: 8px;
-            color: #b88945;
-            font-family: 'Inter', 'Noto Sans Greek', sans-serif;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.34em;
+            width: 34px;
+            height: 34px;
+            margin: 0 auto 8px;
+            background-image: url("data:image/svg+xml,%3Csvg width='46' height='46' viewBox='0 0 46 46' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M23 38V10' stroke='%230b0f17' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M23 19C15 12 10 13 6 20C13 22 18 23 23 19Z' stroke='%230b0f17' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M23 19C31 12 36 13 40 20C33 22 28 23 23 19Z' stroke='%230b0f17' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M23 30C16 25 12 26 9 32C15 34 20 34 23 30Z' stroke='%230b0f17' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M23 30C30 25 34 26 37 32C31 34 26 34 23 30Z' stroke='%230b0f17' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
         }
 
         h1 {
             font-size: clamp(35px, 10vw, 48px);
             font-style: normal;
             font-weight: 400;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.1em;
             line-height: 1;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        h1::after {
+            content: "EST. 2024";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            margin-top: 9px;
+            color: #64748b;
+            font-family: 'Inter', 'Noto Sans Greek', sans-serif;
+            font-size: 10px;
+            font-style: normal;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+        }
+
+        h1::after {
+            text-transform: uppercase;
         }
 
         .subtitle {
-            margin-bottom: 15px;
-            color: #b88945;
+            margin-bottom: 18px;
+            color: #0f172a;
             font-size: 11px;
             font-weight: 800;
             letter-spacing: 0.17em;
@@ -611,45 +643,51 @@
         .wifi-info {
             margin: 0 auto 24px;
             color: #0f172a;
-            font-size: 11.5px;
+            font-size: 11px;
         }
 
         .wifi-info strong {
-            color: #b88945;
+            color: #0f172a;
         }
 
         .language-switch {
-            top: 16px;
-            right: 16px;
+            top: 17px;
+            right: 18px;
             gap: 0;
-            padding: 4px;
-            border-color: rgba(184, 137, 69, 0.35);
-            background: rgba(255, 255, 255, 0.92);
+            padding: 0;
+            border: 0;
+            background: transparent;
             box-shadow: none;
         }
 
         .lang-btn {
-            width: 34px;
-            height: 27px;
-            color: #8a642f;
+            width: 25px;
+            height: 22px;
+            color: #0f172a;
             font-family: 'Inter', 'Noto Sans Greek', sans-serif;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             letter-spacing: 0.06em;
+            background: transparent;
+            border-radius: 0;
+        }
+
+        .lang-btn + .lang-btn {
+            border-left: 1px solid #cbd5e1;
         }
 
         .lang-btn.active {
-            background: #0b0f17;
-            color: #ffffff;
+            background: transparent;
+            color: #0f172a;
             box-shadow: none;
         }
 
         .categories {
             top: -28px;
             justify-content: flex-start;
-            gap: 12px;
-            padding-top: 18px;
-            padding-bottom: 16px;
+            gap: 8px;
+            padding-top: 16px;
+            padding-bottom: 18px;
             margin-left: -20px;
             margin-right: -20px;
             padding-left: 20px;
@@ -657,50 +695,51 @@
         }
 
         .cat-btn {
-            padding: 7px 4px 9px;
-            border: 0;
-            border-bottom: 2px solid transparent;
-            border-radius: 0;
-            background: transparent;
+            padding: 9px 17px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 999px;
+            background: #ffffff;
             box-shadow: none;
             color: #334155;
             font-family: 'Inter', 'Noto Sans Greek', sans-serif;
             font-size: 12px;
             font-style: normal;
-            font-weight: 800;
+            font-weight: 700;
             letter-spacing: 0.02em;
         }
 
         .cat-btn.active,
         .cat-btn:hover {
-            background: transparent;
-            color: #0b0f17;
-            border-color: #b88945;
-            box-shadow: none;
-            transform: none;
+            background: #0b0f17;
+            color: #ffffff;
+            border-color: #0b0f17;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
+            transform: translateY(-1px);
         }
 
         .category-section-title {
-            font-family: 'Playfair Display', 'GFS Didot', serif;
-            font-size: clamp(27px, 8vw, 36px);
+            font-family: 'Inter', 'Noto Sans Greek', sans-serif;
+            font-size: clamp(15px, 4vw, 18px);
             font-style: normal;
+            font-weight: 800;
             margin-top: 34px;
-            margin-bottom: 16px;
+            margin-bottom: 18px;
             color: #0b0f17;
             gap: 13px;
+            letter-spacing: 0.02em;
         }
 
         .category-section-title::before,
         .category-section-title::after {
-            width: clamp(44px, 17vw, 76px);
+            width: clamp(42px, 16vw, 70px);
             height: 1px;
             background-image: none;
-            background: linear-gradient(90deg, transparent, rgba(184, 137, 69, 0.68));
+            background: linear-gradient(90deg, transparent, rgba(15, 23, 42, 0.24));
         }
 
         .category-section-title::after {
             transform: none;
-            background: linear-gradient(90deg, rgba(184, 137, 69, 0.68), transparent);
+            background: linear-gradient(90deg, rgba(15, 23, 42, 0.24), transparent);
         }
 
         .menu-grid {
@@ -754,14 +793,14 @@
         .menu-footer {
             margin: 34px -20px -20px;
             padding: 30px 20px 22px;
-            border-top: 1px solid rgba(184, 137, 69, 0.42);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 0 0 18px 18px;
-            background: linear-gradient(180deg, #0b0f17, #111827);
+            background: linear-gradient(180deg, #172013, #10170e);
             color: #d6dee9;
         }
 
         .footer-title {
-            color: #d4a45f;
+            color: #ffffff;
             font-size: clamp(19px, 5vw, 23px);
         }
 
@@ -1103,14 +1142,15 @@
             }
 
             .cat-btn {
-                padding: 7px 3px 9px;
+                padding: 9px 16px;
                 font-size: 12px;
+                border-radius: 999px;
             }
 
             .category-section-title {
                 margin-top: 28px;
                 margin-bottom: 14px;
-                font-size: clamp(26px, 8vw, 34px);
+                font-size: clamp(15px, 4.2vw, 18px);
             }
 
             .menu-item {
