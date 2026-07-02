@@ -176,26 +176,6 @@
             gap: 14px;
         }
 
-        .sidebar-qr {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 8px;
-            padding: 16px;
-            background: #111c2f;
-            border: 1px solid #24344f;
-            border-radius: 8px;
-        }
-
-        .sidebar-qr h3 {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #94a3b8;
-            letter-spacing: 0.5px;
-        }
-
         .restaurant-settings {
             padding-top: 18px;
             border-top: 1px solid #24344f;
@@ -413,27 +393,6 @@
             font-size: 12px;
             font-weight: 600;
         }
-
-        #qr-code-element {
-            padding: 6px;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            display: inline-block;
-        }
-
-        .btn-qr-download {
-            background: #ffffff;
-            color: #0f172a;
-            border: 1px solid #cbd5e1;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-qr-download:hover { background: #f8fafc; border-color: #94a3b8; }
 
         .btn-manage-categories {
             display: inline-flex;
@@ -893,12 +852,6 @@
 
             <div class="sidebar-menu-tools">
                 <a href="menu.html" class="btn-view-menu">View Customer Menu</a>
-                <div class="sidebar-qr">
-                    <h3>Live Menu QR Code</h3>
-                    <div id="qr-code-element"></div>
-                    <button class="btn-qr-download" onclick="downloadMenuQR()">Download PNG</button>
-                </div>
-
             </div>
         </aside>
 
@@ -1015,7 +968,6 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script type="module" src="app.js"></script>
 </body>
 </html>
