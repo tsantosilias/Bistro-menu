@@ -377,9 +377,8 @@ function renderDashboard() {
             row.style.backgroundColor = "rgba(239, 68, 68, 0.05)";
         }
 
-        const availabilityActionLabel = itemIsOutOfStock ? 'Mark Available' : 'Mark Out of Stock';
-        const visibilityActionLabel = itemIsHidden ? 'Show Item' : 'Hide Item';
-        const categoryClass = safeClassName(item.category);
+        const availabilityActionLabel = itemIsOutOfStock ? 'Available' : 'Out of Stock';
+        const visibilityActionLabel = itemIsHidden ? 'Show' : 'Hide';
         const thumbnailHTML = item.imageUrl
             ? `<img class="dish-thumb" src="${escapeHTML(item.imageUrl)}" alt="${escapeHTML(item.name)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'dish-thumb dish-thumb-placeholder',textContent:'IMG'}))">`
             : `<span class="dish-thumb dish-thumb-placeholder">IMG</span>`;
@@ -398,13 +397,12 @@ function renderDashboard() {
                     </div>
                 </div>
             </td>
-            <td><span class="badge ${categoryClass}">${escapeHTML(item.category)}</span></td>
             <td><strong>${formatPrice(item.price)} ${escapeHTML(currencySymbol())}</strong></td>
             <td style="text-align: right;">
                 <div class="action-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                     <span class="drag-handle" style="margin-right: 10px;">☰</span>
-                    <button class="btn-row-edit" style="background: ${itemIsOutOfStock ? '#64748b' : '#2a4a58'}; color: white;" data-action="toggle-stock" data-id="${item.id}">${availabilityActionLabel}</button>
-                    <button class="btn-row-edit" style="background: ${itemIsHidden ? '#0f172a' : '#f8fafc'}; color: ${itemIsHidden ? '#ffffff' : '#334155'};" data-action="toggle-visibility" data-id="${item.id}">${visibilityActionLabel}</button>
+                    <button class="btn-row-edit btn-stock ${itemIsOutOfStock ? 'is-out' : ''}" data-action="toggle-stock" data-id="${item.id}">${availabilityActionLabel}</button>
+                    <button class="btn-row-edit btn-visibility ${itemIsHidden ? 'is-hidden' : ''}" data-action="toggle-visibility" data-id="${item.id}">${visibilityActionLabel}</button>
                     <button class="btn-row-edit" data-action="edit" data-id="${item.id}">Edit</button>
                     <button class="btn-row-del" data-action="delete" data-id="${item.id}">Delete</button>
                 </div>

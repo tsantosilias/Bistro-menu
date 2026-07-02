@@ -527,6 +527,9 @@
             font-size: 16px;
             padding: 4px 8px;
             transition: color 0.2s;
+            order: 99;
+            margin-left: 4px;
+            margin-right: 0 !important;
         }
         .drag-handle:hover { color: #64748b; }
 
@@ -541,10 +544,34 @@
             background: #ffffff;
             color: #334155;
             transition: all 0.2s;
+            white-space: nowrap;
         }
         .btn-row-edit:hover { background: #f8fafc; border-color: #cbd5e1; }
         .btn-row-del { color: #ef4444; border-color: #fca5a5; background: #fff5f5; }
         .btn-row-del:hover { background: #fee2e2; }
+
+        .btn-stock {
+            background: #24495a;
+            border-color: #24495a;
+            color: #ffffff;
+        }
+
+        .btn-stock.is-out {
+            background: #64748b;
+            border-color: #64748b;
+        }
+
+        .btn-visibility {
+            background: #fff7ed;
+            border-color: #fed7aa;
+            color: #9a3412;
+        }
+
+        .btn-visibility.is-hidden {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+            color: #047857;
+        }
 
         .sortable-ghost { opacity: 0.4; background-color: #f8fafc !important; }
 
@@ -737,8 +764,7 @@
                 min-width: 0;
             }
 
-            td:nth-child(2),
-            td:nth-child(3) {
+            td:nth-child(2) {
                 display: none;
             }
 
@@ -913,10 +939,9 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 45%;">Dish Details</th>
-                            <th style="width: 15%;">Category</th>
+                            <th style="width: 55%;">Dish Details</th>
                             <th style="width: 15%;">Price</th>
-                            <th style="text-align: right; width: 25%;">Actions</th>
+                            <th style="text-align: right; width: 30%;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="menu-table-body"></tbody>
