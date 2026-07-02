@@ -461,58 +461,102 @@
         }
 
         .menu-footer {
-            margin-top: 34px;
-            padding: 24px 12px 8px;
-            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            margin-top: 38px;
+            padding: 32px 18px 10px;
+            border-top: 1px solid rgba(176, 138, 87, 0.18);
             text-align: center;
-            color: #64748b;
+            color: #65758d;
             font-size: 13px;
-            line-height: 1.6;
+            line-height: 1.65;
+            background:
+                radial-gradient(circle at top, rgba(176, 138, 87, 0.08), transparent 34%),
+                linear-gradient(180deg, rgba(255, 252, 247, 0.9), rgba(255, 255, 255, 0));
         }
 
-        .menu-footer strong {
+        .footer-ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 0 auto 12px;
+            color: #b08a57;
+        }
+
+        .footer-ornament::before,
+        .footer-ornament::after {
+            content: "";
+            width: 74px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(176, 138, 87, 0.58), transparent);
+        }
+
+        .footer-ornament span {
+            width: 8px;
+            height: 8px;
+            border: 1px solid rgba(176, 138, 87, 0.75);
+            border-radius: 2px;
+            background: #fffaf3;
+            transform: rotate(45deg);
+            box-shadow: 0 0 0 5px rgba(176, 138, 87, 0.08);
+        }
+
+        .footer-title {
             display: block;
             color: #0f172a;
-            font-size: 15px;
-            margin-bottom: 6px;
+            font-family: 'Playfair Display', 'GFS Didot', serif;
+            font-size: clamp(19px, 3vw, 24px);
+            font-style: italic;
+            font-weight: 600;
+            margin-bottom: 8px;
             letter-spacing: 0;
         }
 
         .footer-copy {
             display: block;
-            max-width: 560px;
+            max-width: 590px;
             margin: 0 auto;
+            color: #596b84;
         }
 
         .footer-contact {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 230px));
             justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 12px;
+            margin-top: 18px;
         }
 
-        .footer-contact span {
-            display: inline-flex;
+        .footer-card {
+            display: flex;
+            min-width: 0;
+            min-height: 74px;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             gap: 5px;
-            min-height: 30px;
-            padding: 6px 12px;
-            border: 1px solid rgba(15, 23, 42, 0.1);
-            border-radius: 999px;
-            background: #f8fafc;
+            padding: 13px 14px;
+            border: 1px solid rgba(176, 138, 87, 0.28);
+            border-radius: 16px;
+            background: linear-gradient(180deg, #fffdf8, #f8fafc);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.07);
             color: #475569;
-            font-size: 12px;
-            line-height: 1.2;
+            line-height: 1.25;
         }
 
-        .footer-contact strong {
-            display: inline;
-            margin: 0;
-            color: #0f172a;
+        .footer-card-label {
             font-family: 'Inter', 'Noto Sans Greek', sans-serif;
-            font-size: 12px;
-            font-style: normal;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #9a7443;
+        }
+
+        .footer-card-value {
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            color: #0f172a;
+            font-size: 13px;
             font-weight: 700;
         }
 
@@ -768,6 +812,27 @@
                 max-width: 100%;
                 font-size: 14px;
             }
+
+            .menu-footer {
+                margin-top: 32px;
+                padding: 28px 14px 6px;
+            }
+
+            .footer-ornament::before,
+            .footer-ornament::after {
+                width: 52px;
+            }
+
+            .footer-contact {
+                grid-template-columns: 1fr;
+                max-width: 285px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .footer-card {
+                min-height: 68px;
+            }
         }
     </style>
 </head>
@@ -795,11 +860,18 @@
         <main class="menu-grid" id="customer-menu-grid"></main>
 
         <footer class="menu-footer">
-            <strong data-i18n="footerTitle">Thank you for visiting</strong>
+            <div class="footer-ornament" aria-hidden="true"><span></span></div>
+            <strong class="footer-title" data-i18n="footerTitle">Thank you for visiting</strong>
             <span class="footer-copy" data-i18n="footerText">Prices include VAT. Ask our staff for daily specials and allergen information.</span>
             <div class="footer-contact" id="footer-contact" hidden>
-                <span id="footer-phone-wrap" hidden><strong>Tel:</strong><span id="footer-phone"></span></span>
-                <span id="footer-social-wrap" hidden><strong>Social:</strong><span id="footer-social"></span></span>
+                <span class="footer-card" id="footer-phone-wrap" hidden>
+                    <span class="footer-card-label">Tel</span>
+                    <span class="footer-card-value" id="footer-phone"></span>
+                </span>
+                <span class="footer-card" id="footer-social-wrap" hidden>
+                    <span class="footer-card-label">Social</span>
+                    <span class="footer-card-value" id="footer-social"></span>
+                </span>
             </div>
         </footer>
     </div>
