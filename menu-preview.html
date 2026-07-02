@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Greek:wght@400;500;600;700;800&family=Playball&family=Playfair+Display:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Greek:wght@400;500;600;700;800&family=Noto+Serif:wght@400;500;600;700&family=Playball&family=Playfair+Display:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
     
     <style>
         @font-face {
@@ -1185,7 +1185,7 @@
         body {
             min-height: 100svh;
             height: 100svh;
-            padding: 12px;
+            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1196,20 +1196,20 @@
         }
 
         .menu-wrapper {
-            width: min(100%, 430px);
-            height: calc(100svh - 24px);
+            width: 100%;
+            height: 100svh;
             min-height: 0;
             max-height: none;
             padding: 0;
             position: relative;
             overflow-y: auto;
             overflow-x: hidden;
-            border: 1px solid rgba(214, 169, 96, 0.55);
-            border-radius: 18px;
+            border: 0;
+            border-radius: 0;
             background:
                 linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(248, 241, 229, 0.92)),
                 #f7f1e7;
-            box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+            box-shadow: none;
             overscroll-behavior: contain;
         }
 
@@ -1501,7 +1501,7 @@
             margin: 0;
             padding: 34px 22px 26px;
             border-top: 1px solid rgba(214, 169, 96, 0.38);
-            border-radius: 0 0 18px 18px;
+            border-radius: 0;
             background:
                 radial-gradient(circle at 50% 0%, rgba(214, 169, 96, 0.12), transparent 42%),
                 linear-gradient(180deg, #2b2018, #17100c);
@@ -1582,15 +1582,63 @@
             font-weight: 600;
         }
 
+        /* Greek mode needs Greek-native fonts; avoid the decorative Arrose fallback here. */
+        body.lang-el {
+            font-family: 'Noto Sans Greek', 'Inter', sans-serif;
+        }
+
+        body.lang-el h1 {
+            font-family: 'GFS Didot', 'Noto Serif', 'Noto Sans Greek', serif;
+            font-size: clamp(30px, 9.5vw, 44px);
+            font-style: normal;
+            font-weight: 400;
+            line-height: 1.08;
+            letter-spacing: 0.03em;
+            text-transform: none;
+        }
+
+        body.lang-el .category-section-title,
+        body.lang-el .footer-title {
+            font-family: 'GFS Didot', 'Noto Serif', 'Noto Sans Greek', serif;
+            font-style: normal;
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+
+        body.lang-el .category-section-title {
+            font-size: clamp(22px, 6.2vw, 28px);
+        }
+
+        body.lang-el .item-name,
+        body.lang-el .modal-title-row h2 {
+            font-family: 'Noto Sans Greek', 'Inter', sans-serif;
+            font-style: normal;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+
+        body.lang-el .item-name {
+            font-size: 13px;
+            line-height: 1.26;
+        }
+
+        body.lang-el .item-description,
+        body.lang-el .item-badge,
+        body.lang-el .cat-btn,
+        body.lang-el .footer-copy,
+        body.lang-el .footer-card-value {
+            font-family: 'Noto Sans Greek', 'Inter', sans-serif;
+        }
+
         @media (max-width: 420px) {
             body {
-                padding: 8px;
+                padding: 0;
             }
 
             .menu-wrapper {
-                width: min(100%, 390px);
-                height: calc(100svh - 16px);
-                border-radius: 16px;
+                width: 100%;
+                height: 100svh;
+                border-radius: 0;
             }
 
             header {
@@ -1651,7 +1699,7 @@
 
             .menu-footer {
                 padding: 32px 18px 24px;
-                border-radius: 0 0 16px 16px;
+                border-radius: 0;
             }
         }
     </style>
