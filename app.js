@@ -59,6 +59,7 @@ const restaurantSettingsStatus = document.getElementById('restaurant-settings-st
 const statTotalItems = document.getElementById('stat-total-items');
 const statAvailableItems = document.getElementById('stat-available-items');
 const statOutOfStockItems = document.getElementById('stat-out-of-stock-items');
+const statHiddenItems = document.getElementById('stat-hidden-items');
 const statTotalCategories = document.getElementById('stat-total-categories');
 
 // Selectors για τη λειτουργία του Responsive Burger Menu
@@ -236,6 +237,26 @@ function currencySymbol() {
     return restaurantSettingsState.currency || DEFAULT_RESTAURANT_SETTINGS.currency;
 }
 
+function isOutOfStock(item) {
+    return Boolean(item.outOfStock ?? item.hidden);
+}
+
+function isHiddenFromCustomer(item) {
+    return Boolean(item.hiddenFromMenu);
+}
+
+function getItemStatus(item) {
+    if (isHiddenFromCustomer(item)) {
+        return { label: 'Hidden', className: 'hidden-status' };
+    }
+
+    if (isOutOfStock(item)) {
+        return { label: 'Out of Stock', className: 'out' };
+    }
+
+    return { label: 'Available', className: 'available' };
+}
+
 async function uploadDishImage(file) {
     if (!file) return { imageUrl: '', imagePublicId: '' };
 
@@ -344,14 +365,20 @@ function renderDashboard() {
         const row = document.createElement('tr');
         row.setAttribute('data-id', item.id);
         
-        if (item.hidden) {
-            row.style.opacity = "0.6";
+        const itemIsOutOfStock = isOutOfStock(item);
+        const itemIsHidden = isHiddenFromCustomer(item);
+        const status = getItemStatus(item);
+
+        if (itemIsHidden) {
+            row.style.opacity = "0.58";
+            row.style.backgroundColor = "rgba(100, 116, 139, 0.08)";
+        } else if (itemIsOutOfStock) {
+            row.style.opacity = "0.72";
             row.style.backgroundColor = "rgba(239, 68, 68, 0.05)";
         }
 
-        const availabilityLabel = item.hidden ? 'Out of Stock' : 'Available';
-        const availabilityActionLabel = item.hidden ? 'Mark Available' : 'Mark Out of Stock';
-        const availabilityClass = item.hidden ? 'out' : 'available';
+        const availabilityActionLabel = itemIsOutOfStock ? 'Mark Available' : 'Mark Out of Stock';
+        const visibilityActionLabel = itemIsHidden ? 'Show Item' : 'Hide Item';
         const categoryClass = safeClassName(item.category);
         const thumbnailHTML = item.imageUrl
             ? `<img class="dish-thumb" src="${escapeHTML(item.imageUrl)}" alt="${escapeHTML(item.name)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'dish-thumb dish-thumb-placeholder',textContent:'IMG'}))">`
@@ -364,7 +391,7 @@ function renderDashboard() {
                     <div class="dish-main">
                         <div class="dish-title-line">
                             <strong>${escapeHTML(item.name)}</strong>
-                            <span class="status-pill ${availabilityClass}">${availabilityLabel}</span>
+                            <span class="status-pill ${status.className}">${status.label}</span>
                         </div>
                         <div style="font-size: 13px; color: #64748b; font-weight: normal; margin-top: 4px;">${item.description ? escapeHTML(item.description) : '<i>No description added.</i>'}</div>
                         ${renderAdminBadges(item.badges)}
@@ -376,7 +403,8 @@ function renderDashboard() {
             <td style="text-align: right;">
                 <div class="action-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                     <span class="drag-handle" style="margin-right: 10px;">☰</span>
-                    <button class="btn-row-edit" style="background: ${item.hidden ? '#64748b' : '#2a4a58'}; color: white;" data-action="toggle-stock" data-id="${item.id}">${availabilityActionLabel}</button>
+                    <button class="btn-row-edit" style="background: ${itemIsOutOfStock ? '#64748b' : '#2a4a58'}; color: white;" data-action="toggle-stock" data-id="${item.id}">${availabilityActionLabel}</button>
+                    <button class="btn-row-edit" style="background: ${itemIsHidden ? '#0f172a' : '#f8fafc'}; color: ${itemIsHidden ? '#ffffff' : '#334155'};" data-action="toggle-visibility" data-id="${item.id}">${visibilityActionLabel}</button>
                     <button class="btn-row-edit" data-action="edit" data-id="${item.id}">Edit</button>
                     <button class="btn-row-del" data-action="delete" data-id="${item.id}">Delete</button>
                 </div>
@@ -390,14 +418,30 @@ function renderDashboard() {
     renderFilterTabs();        
 }
 
-window.toggleHideItem = async function(id) {
+window.toggleStockItem = async function(id) {
     const item = menuItems.find(i => i.id === id);
     if (item) {
         try {
-            await updateDoc(doc(db, 'menuItems', id), { hidden: !item.hidden });
+            const nextOutOfStock = !isOutOfStock(item);
+            await updateDoc(doc(db, 'menuItems', id), {
+                outOfStock: nextOutOfStock,
+                hidden: nextOutOfStock
+            });
         } catch (error) {
             console.error('Could not update availability:', error);
             alert(readableDataError(error, 'update availability'));
+        }
+    }
+};
+
+window.toggleHiddenItem = async function(id) {
+    const item = menuItems.find(i => i.id === id);
+    if (item) {
+        try {
+            await updateDoc(doc(db, 'menuItems', id), { hiddenFromMenu: !isHiddenFromCustomer(item) });
+        } catch (error) {
+            console.error('Could not update visibility:', error);
+            alert(readableDataError(error, 'update menu visibility'));
         }
     }
 };
@@ -407,7 +451,8 @@ menuTableBody.addEventListener('click', async (event) => {
     if (!button) return;
 
     const id = button.dataset.id;
-    if (button.dataset.action === 'toggle-stock') await window.toggleHideItem(id);
+    if (button.dataset.action === 'toggle-stock') await window.toggleStockItem(id);
+    if (button.dataset.action === 'toggle-visibility') await window.toggleHiddenItem(id);
     if (button.dataset.action === 'edit') openEditModal(id);
     if (button.dataset.action === 'delete') await deleteItem(id);
 });
@@ -452,10 +497,12 @@ function handleTabClick(buttonElement, category) {
 
 function calculateCalculatedStats() {
     if (statTotalItems) statTotalItems.textContent = menuItems.length;
-    const availableItems = menuItems.filter(item => !item.hidden).length;
-    const outOfStockItems = menuItems.filter(item => item.hidden).length;
+    const availableItems = menuItems.filter(item => !isOutOfStock(item) && !isHiddenFromCustomer(item)).length;
+    const outOfStockItems = menuItems.filter(item => isOutOfStock(item) && !isHiddenFromCustomer(item)).length;
+    const hiddenItems = menuItems.filter(item => isHiddenFromCustomer(item)).length;
     if (statAvailableItems) statAvailableItems.textContent = availableItems;
     if (statOutOfStockItems) statOutOfStockItems.textContent = outOfStockItems;
+    if (statHiddenItems) statHiddenItems.textContent = hiddenItems;
     if (statTotalCategories) statTotalCategories.textContent = categoryOrder.length;
 }
 
@@ -483,6 +530,8 @@ menuForm.addEventListener('submit', async (e) => {
             imageUrl: uploadedImage.imageUrl,
             imagePublicId: uploadedImage.imagePublicId,
             order: nextOrder, price: parseFloat(itemPriceInput.value), category: selectedCategory, hidden: false,
+            outOfStock: false,
+            hiddenFromMenu: false,
             badges: getCheckedBadgeValues(itemBadgeInputs)
         };
 

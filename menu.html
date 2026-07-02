@@ -1042,6 +1042,14 @@
             return restaurantSettings.currency || '€';
         }
 
+        function isOutOfStock(item) {
+            return Boolean(item.outOfStock ?? item.hidden);
+        }
+
+        function isHiddenFromCustomer(item) {
+            return Boolean(item.hiddenFromMenu);
+        }
+
         function enabledLanguages() {
             const rawLanguages = restaurantSettings.languages || 'en,el';
             const languages = String(rawLanguages)
@@ -1126,6 +1134,7 @@
             grid.innerHTML = '';
 
             sharedMenu.sort((a, b) => parseInt(a.order || 0) - parseInt(b.order || 0));
+            const customerVisibleMenu = sharedMenu.filter(item => !isHiddenFromCustomer(item));
 
             navContainer.innerHTML = '';
             
@@ -1153,14 +1162,14 @@
                 return;
             }
 
-            if (sharedMenu.length === 0) {
+            if (customerVisibleMenu.length === 0) {
                 grid.innerHTML = `<div class="no-items">${t('empty')}</div>`;
                 return;
             }
 
             if (customerFilter === 'All') {
                 categoriesToDisplay.forEach(cat => {
-                    const catItems = sharedMenu.filter(item => item.category === cat);
+                    const catItems = customerVisibleMenu.filter(item => item.category === cat);
                     if (catItems.length > 0) {
                         const titleDiv = document.createElement('div');
                         titleDiv.className = 'category-section-title';
@@ -1171,7 +1180,7 @@
                     }
                 });
             } else {
-                const visibleItems = sharedMenu.filter(item => item.category === customerFilter);
+                const visibleItems = customerVisibleMenu.filter(item => item.category === customerFilter);
                 if (visibleItems.length === 0) {
                     grid.innerHTML = `<div class="no-items">${t('emptyCategory')}</div>`;
                     return;
@@ -1198,22 +1207,23 @@
                 ? `<div class="item-badges">${badges.map(badge => `<span class="item-badge ${safeClassName(badge)}">${escapeHTML(badgeLabel(badge))}</span>`).join('')}</div>`
                 : '';
             
-            const priceHTML = item.hidden 
+            const itemIsOutOfStock = isOutOfStock(item);
+            const priceHTML = itemIsOutOfStock
                 ? `<span style="color: #ef4444; font-size: 13px; font-weight: 500; letter-spacing: 0;">${t('outOfStock')}</span>`
                 : `${formatPrice(item.price)} ${escapeHTML(currencySymbol())}`;
 
-            const nameStyle = item.hidden 
+            const nameStyle = itemIsOutOfStock
                 ? `color: #94a3b8; font-weight: 500; font-style: italic;` 
                 : `color: #0f172a;`;
 
             itemDiv.innerHTML = `
                 ${imageHTML}
                 <div class="item-content">
-                    <div class="item-header" style="${item.hidden ? 'opacity: 0.6;' : ''}">
+                    <div class="item-header" style="${itemIsOutOfStock ? 'opacity: 0.6;' : ''}">
                         <span class="item-name" style="${nameStyle}">${escapeHTML(name)}</span>
                         <span class="item-price">${priceHTML}</span>
                     </div>
-                    <div class="item-description" style="${item.hidden ? 'opacity: 0.5;' : ''}">${descriptionContent}</div>
+                    <div class="item-description" style="${itemIsOutOfStock ? 'opacity: 0.5;' : ''}">${descriptionContent}</div>
                     ${badgesHTML}
                 </div>
             `;
@@ -1238,7 +1248,7 @@
             const imageHTML = item.imageUrl
                 ? `<img class="modal-photo" src="${escapeHTML(item.imageUrl)}" alt="${escapeHTML(name)}">`
                 : '';
-            const priceHTML = item.hidden
+            const priceHTML = isOutOfStock(item)
                 ? `<span style="color: #ef4444;">${t('outOfStock')}</span>`
                 : `${formatPrice(item.price)} ${escapeHTML(currencySymbol())}`;
 

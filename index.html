@@ -352,7 +352,7 @@
 
         .analytics-cards {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
             gap: 16px;
             margin-top: 30px;
             margin-bottom: 35px;
@@ -619,6 +619,12 @@
             background: #fef2f2;
             border: 1px solid #fecaca;
         }
+
+        .status-pill.hidden-status {
+            color: #475569;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+        }
         .modal-overlay.hidden { display: none; }
         
         .modal-box {
@@ -749,7 +755,7 @@
                 flex-wrap: wrap;
                 justify-content: flex-end !important;
                 gap: 6px !important;
-                max-width: 140px;
+                max-width: 190px;
             }
 
             .drag-handle {
@@ -886,6 +892,11 @@
                     <h3>Out of Stock Items</h3>
                     <p class="metric-value" id="stat-out-of-stock-items">0</p>
                     <span class="metric-note">Hidden from ordering</span>
+                </div>
+                <div class="card">
+                    <h3>Hidden Items</h3>
+                    <p class="metric-value" id="stat-hidden-items">0</p>
+                    <span class="metric-note">Not shown on menu</span>
                 </div>
                 <div class="card card-actions">
                     <h3>Menu Tools</h3>
