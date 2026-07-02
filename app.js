@@ -399,13 +399,22 @@ function renderDashboard() {
             </td>
             <td><strong>${formatPrice(item.price)} ${escapeHTML(currencySymbol())}</strong></td>
             <td style="text-align: right;">
-                <div class="action-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                <div class="action-row action-row-inline" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                     <span class="drag-handle" style="margin-right: 10px;">☰</span>
                     <button class="btn-row-edit btn-stock ${itemIsOutOfStock ? 'is-out' : ''}" data-action="toggle-stock" data-id="${item.id}">${availabilityActionLabel}</button>
                     <button class="btn-row-edit btn-visibility ${itemIsHidden ? 'is-hidden' : ''}" data-action="toggle-visibility" data-id="${item.id}">${visibilityActionLabel}</button>
                     <button class="btn-row-edit" data-action="edit" data-id="${item.id}">Edit</button>
                     <button class="btn-row-del" data-action="delete" data-id="${item.id}">Delete</button>
                 </div>
+                <details class="action-menu">
+                    <summary aria-label="Open item actions">▾</summary>
+                    <div class="action-menu-panel">
+                        <button class="btn-row-edit btn-stock ${itemIsOutOfStock ? 'is-out' : ''}" data-action="toggle-stock" data-id="${item.id}">${availabilityActionLabel}</button>
+                        <button class="btn-row-edit btn-visibility ${itemIsHidden ? 'is-hidden' : ''}" data-action="toggle-visibility" data-id="${item.id}">${visibilityActionLabel}</button>
+                        <button class="btn-row-edit" data-action="edit" data-id="${item.id}">Edit</button>
+                        <button class="btn-row-del" data-action="delete" data-id="${item.id}">Delete</button>
+                    </div>
+                </details>
             </td>
         `;
         menuTableBody.appendChild(row);
@@ -453,6 +462,7 @@ menuTableBody.addEventListener('click', async (event) => {
     if (button.dataset.action === 'toggle-visibility') await window.toggleHiddenItem(id);
     if (button.dataset.action === 'edit') openEditModal(id);
     if (button.dataset.action === 'delete') await deleteItem(id);
+    button.closest('.action-menu')?.removeAttribute('open');
 });
 
 function renderDropdowns() {
